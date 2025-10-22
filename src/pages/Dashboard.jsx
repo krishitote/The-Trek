@@ -113,7 +113,7 @@ export default function Dashboard() {
           <Text fontWeight="bold">
             Your Rank: #{userRank.rank} / {userRank.totalUsers}
           </Text>
-          <Text>Total Distance: {userRank.totalDistance.toFixed(1)} km</Text>
+          <Text>Total Distance: {Number(userRank.totalDistance || 0).toFixed(1)} km</Text>
         </Box>
       )}
 
