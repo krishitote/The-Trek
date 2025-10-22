@@ -24,8 +24,8 @@ router.post("/", authenticateToken, async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Activity creation failed:", err);
-    res.status(500).json({ message: "Error submitting activity" });
+    console.error("Activity creation failed:", err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 
