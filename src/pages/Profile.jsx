@@ -37,7 +37,7 @@ export default function Profile() {
       setMessage("");
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users/${user.user_id}`,
+        `${import.meta.env.VITE_API_URL}/api/users/${user.id}`,
         {
           method: "PUT",
           headers: {
