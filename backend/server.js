@@ -9,6 +9,8 @@ import {Pool} from "pg";
 import authRoutes from "./routes/auth.js";
 import activityRoutes from "./routes/activities.js";
 import userRoutes from "./routes/users.js";
+import uploadRoutes from "./routes/upload.js";
+
 
 dotenv.config();
 
@@ -28,6 +30,10 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/users", userRoutes);
+
+// Photo
+app.use("/api/upload", uploadRoutes);
+app.use("/uploads", express.static("uploads")); // serve static files
 
 // --- Health Check Route ---
 app.get("/api/health", async (req, res) => {
