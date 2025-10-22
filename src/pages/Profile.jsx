@@ -10,6 +10,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+
+  
   // Calculate BMI
   const calculateBMI = (w, h) => {
     if (!w || !h) return null;
@@ -104,6 +106,52 @@ export default function Profile() {
           )}
         </div>
 
+<div className="flex flex-col items-center mb-6">
+  <img
+    src={
+      user.profile_image
+        ? `${import.meta.env.VITE_API_URL}${user.profile_image}`
+        : "/default-avatar.png"
+    }
+    alt="Profile"
+    className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
+  />
+  
+  <label className="mt-2 cursor-pointer text-blue-600 hover:underline">
+    Change Photo
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("photo", file);
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.token}`,
+          },
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          const updatedUser = { ...user, profile_image: data.profile_image };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        } else {
+          alert("Failed to upload photo");
+        }
+      }}
+    />
+  </label>
+</div>
+
+        
         <div className="flex items-center space-x-2">
           <strong>Height (cm):</strong>
           {editing ? (
