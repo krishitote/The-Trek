@@ -33,7 +33,7 @@ export async function apiActivities(token = null, userId = null) {
 
 export async function apiSubmitActivity(token, body) {
   if (!token) throw new Error("Not authenticated");
-  const res = await fetch(`${API_URL}/api/activities`, {
+  const res = await fetch(`${API_URL}/activities`, {
     method: "POST",
     headers: authHeaders(token),
     body: JSON.stringify(body),
