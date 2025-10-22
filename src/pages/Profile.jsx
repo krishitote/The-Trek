@@ -70,9 +70,9 @@ export default function Profile() {
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-center">Your Profile</h1>
 
-      <div className="p-6 bg-gray-50 rounded-lg shadow flex space-x-6">
+      <div className="p-6 bg-gray-50 rounded-lg shadow flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
         {/* Profile Photo */}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center md:items-start">
           <img
             src={
               user.profile_image
@@ -129,8 +129,8 @@ export default function Profile() {
             <strong>Age:</strong> {user.age || "N/A"} years
           </p>
 
-          {/* Weight & Height */}
-          <div className="flex items-center space-x-6">
+          {/* Weight, Height, BMI */}
+          <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-2 sm:space-y-0">
             <div className="flex flex-col">
               <strong>Weight (kg):</strong>
               {editing ? (
@@ -160,7 +160,7 @@ export default function Profile() {
             <div className="flex flex-col">
               <strong>BMI:</strong>
               <span
-                className="ml-2 px-2 py-1 text-xs font-semibold text-white rounded-full"
+                className="ml-0 sm:ml-2 px-2 py-1 text-xs font-semibold text-white rounded-full mt-1 sm:mt-0"
                 style={{
                   backgroundColor:
                     bmi < 18.5
@@ -180,7 +180,7 @@ export default function Profile() {
           {message && <p className="text-sm text-red-600">{message}</p>}
 
           {editing ? (
-            <div className="flex space-x-2 mt-2">
+            <div className="flex flex-col sm:flex-row sm:space-x-2 mt-2 space-y-2 sm:space-y-0">
               <button
                 onClick={handleSave}
                 disabled={loading}
