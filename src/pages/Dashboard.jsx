@@ -31,7 +31,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [userActs, users] = await Promise.all([
-        apiActivities(session.token, user.user_id),
+        apiActivities(session.token, user.id),
         apiUsers(),
       ]);
       setActivities(userActs);
@@ -40,18 +40,18 @@ export default function Dashboard() {
       // Compute ranking
       const leaderboard = await Promise.all(
         users.map(async (u) => {
-          const acts = await apiActivities(session.token, u.user_id);
-          const totalDistance = acts.reduce((sum, a) => sum + (a.distance_km || 0), 0);
+          const acts = await apiActivities(session.token, u.id);
+          const totalDistance = acts.reduce((sum, a) => sum + Number(a.distance_km || 0), 0);
           return { ...u, totalDistance };
         })
       );
       leaderboard.sort((a, b) => b.totalDistance - a.totalDistance);
-      const rank = leaderboard.findIndex((u) => u.user_id === user.user_id) + 1;
+      const rank = leaderboard.findIndex((u) => u.id === user.id) + 1;
       setUserRank({
         rank,
         totalUsers: leaderboard.length,
         totalDistance:
-          leaderboard.find((u) => u.user_id === user.user_id)?.totalDistance || 0,
+          leaderboard.find((u) => u.id === user.id)?.totalDistance || 0,
       });
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
