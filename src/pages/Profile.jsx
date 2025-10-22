@@ -1,3 +1,4 @@
+// src/pages/Profile.jsx
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -9,16 +10,12 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Photo upload state
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-
-  // BMI functions
   const calculateBMI = (w, h) => {
     if (!w || !h) return null;
     const heightM = h / 100;
     return (w / (heightM * heightM)).toFixed(1);
   };
+
   const getBMICategory = (bmi) => {
     if (!bmi) return null;
     if (bmi < 18.5) return "Underweight";
@@ -27,15 +24,16 @@ export default function Profile() {
     return "Obese";
   };
 
-  // Weight & height save
   const handleSave = async () => {
     if (!weight || !height) {
       setMessage("Please enter both weight and height.");
       return;
     }
+
     try {
       setLoading(true);
       setMessage("");
+
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/${user.id}`,
         {
@@ -47,11 +45,13 @@ export default function Profile() {
           body: JSON.stringify({ weight: Number(weight), height: Number(height) }),
         }
       );
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update profile");
 
-      setUser(data);
+      if (setUser) setUser(data);
       localStorage.setItem("user", JSON.stringify(data));
+
       setMessage("Profile updated successfully!");
       setEditing(false);
     } catch (err) {
@@ -59,37 +59,6 @@ export default function Profile() {
       setMessage(err.message || "Failed to update profile");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Photo upload handler
-  const handlePhotoUpload = async () => {
-    if (!selectedFile) return;
-
-    const formData = new FormData();
-    formData.append("photo", selectedFile);
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${session.token}` },
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        const updatedUser = { ...user, profile_image: data.profile_image };
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-        setSelectedFile(null);
-        setPreview(null);
-        alert("Photo uploaded successfully!");
-      } else {
-        alert("Failed to upload photo");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error uploading photo");
     }
   };
 
@@ -101,50 +70,139 @@ export default function Profile() {
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-center">Your Profile</h1>
 
-      <div className="p-6 bg-gray-50 rounded-lg shadow flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
-        {/* Profile Photo Section */}
-        <div className="flex flex-col items-center md:items-start mb-4">
+      <div className="p-6 bg-gray-50 rounded-lg shadow flex space-x-6">
+        {/* Profile Photo */}
+        <div className="flex flex-col items-center">
           <img
             src={
-              preview || user.profile_image
-                ? preview || `${import.meta.env.VITE_API_URL}${user.profile_image}`
+              user.profile_image
+                ? `${import.meta.env.VITE_API_URL}${user.profile_image}`
                 : "/default-avatar.png"
             }
             alt="Profile"
             className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
           />
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            id="photo-upload"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (!file) return;
-              setSelectedFile(file);
-              setPreview(URL.createObjectURL(file));
-            }}
-          />
-          <label
-            htmlFor="photo-upload"
-            className="mt-2 cursor-pointer text-blue-600 hover:underline"
-          >
-            Choose Photo
-          </label>
+          <label className="mt-2 cursor-pointer text-blue-600 hover:underline">
+            Change Photo
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
 
-          {selectedFile && (
-            <button
-              onClick={handlePhotoUpload}
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Upload Photo
-            </button>
-          )}
+                const formData = new FormData();
+                formData.append("photo", file);
+
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${session.token}` },
+                  body: formData,
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                  const updatedUser = { ...user, profile_image: data.profile_image };
+                  localStorage.setItem("user", JSON.stringify(updatedUser));
+                  setUser(updatedUser);
+                } else {
+                  alert("Failed to upload photo");
+                }
+              }}
+            />
+          </label>
         </div>
 
         {/* User Info & Stats */}
         <div className="flex-1 space-y-4">
-          {/* ...rest of your profile fields like weight, height, BMI */}
+          <p>
+            <strong>Name:</strong> {user.first_name} {user.last_name}
+          </p>
+          <p>
+            <strong>Username:</strong> {user.username}
+          </p>
+          <p>
+            <strong>Email:</strong> {user.email}
+          </p>
+          <p>
+            <strong>Age:</strong> {user.age || "N/A"} years
+          </p>
+
+          {/* Weight & Height */}
+          <div className="flex items-center space-x-6">
+            <div className="flex flex-col">
+              <strong>Weight (kg):</strong>
+              {editing ? (
+                <input
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  className="border rounded px-2 py-1 w-24"
+                />
+              ) : (
+                <span>{weight || "N/A"}</span>
+              )}
+            </div>
+            <div className="flex flex-col">
+              <strong>Height (cm):</strong>
+              {editing ? (
+                <input
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  className="border rounded px-2 py-1 w-24"
+                />
+              ) : (
+                <span>{height || "N/A"}</span>
+              )}
+            </div>
+            <div className="flex flex-col">
+              <strong>BMI:</strong>
+              <span
+                className="ml-2 px-2 py-1 text-xs font-semibold text-white rounded-full"
+                style={{
+                  backgroundColor:
+                    bmi < 18.5
+                      ? "#60A5FA"
+                      : bmi < 25
+                      ? "#16A34A"
+                      : bmi < 30
+                      ? "#FACC15"
+                      : "#DC2626",
+                }}
+              >
+                {bmi ? getBMICategory(bmi) : "N/A"}
+              </span>
+            </div>
+          </div>
+
+          {message && <p className="text-sm text-red-600">{message}</p>}
+
+          {editing ? (
+            <div className="flex space-x-2 mt-2">
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditing(true)}
+              className="px-4 py-2 mt-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Edit Weight & Height
+            </button>
+          )}
         </div>
       </div>
     </div>
