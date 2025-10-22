@@ -21,7 +21,7 @@ router.post("/register", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO users (username, email, password_hash)
        VALUES ($1, $2, $3)
-       RETURNING user_id, username, email`,
+       RETURNING id, username, email`,
       [username, email, hashedPassword]
     );
 
@@ -48,13 +48,13 @@ router.post("/login", async (req, res) => {
     if (!valid) return res.status(401).json({ message: "Invalid password" });
 
     const token = jwt.sign(
-      { user_id: user.user_id, username: user.username, email: user.email },
+      { id: user.id, username: user.username, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.json({
-      user: { user_id: user.user_id, username: user.username, email: user.email },
+      user: { id: user.id, username: user.username, email: user.email },
       token,
     });
   } catch (err) {
