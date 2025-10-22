@@ -24,7 +24,7 @@ export async function apiUsers() {
 
 // ---------- Activities ----------
 export async function apiActivities(token = null, userId = null) {
-  const url = new URL(`${API_URL}/api/activities`);
+  const url = new URL(`${API_URL}/activities`);
   if (userId) url.searchParams.append("user_id", userId);
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const res = await fetch(url, { headers });
@@ -33,7 +33,7 @@ export async function apiActivities(token = null, userId = null) {
 
 export async function apiSubmitActivity(token, body) {
   if (!token) throw new Error("Not authenticated");
-  const res = await fetch(`${API_URL}/api/activities`, {
+  const res = await fetch(`${API_URL}/activities`, {
     method: "POST",
     headers: authHeaders(token),
     body: JSON.stringify(body),
@@ -43,7 +43,7 @@ export async function apiSubmitActivity(token, body) {
 
 // ---------- Auth ----------
 export async function apiLogin({ username, password }) {
-  const res = await fetch(`${API_URL}/api/login`, {
+  const res = await fetch(`${API_URL}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -62,7 +62,7 @@ export async function apiRegister({
   weight,
   height,
 }) {
-  const res = await fetch(`${API_URL}/api/register`, {
+  const res = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -82,7 +82,7 @@ export async function apiRegister({
 
 // ---------- Leaderboards ----------
 export async function apiLeaderboards() {
-  const res = await fetch(`${API_URL}/api/leaderboards`);
+  const res = await fetch(`${API_URL}/leaderboards`);
   const data = await handleResponse(res);
   return {
     allTimeLeaders: data.allTimeLeaders || [],
