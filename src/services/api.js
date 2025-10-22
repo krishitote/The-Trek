@@ -82,7 +82,7 @@ export async function apiRegister({
 
 // ---------- Leaderboards ----------
 export async function apiLeaderboards() {
-  const res = await fetch(`${API_URL}/leaderboards`);
+  const res = await fetch(`${API_URL}/api/leaderboards`);
   const data = await handleResponse(res);
   return {
     allTimeLeaders: data.allTimeLeaders || [],
