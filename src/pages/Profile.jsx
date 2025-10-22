@@ -1,3 +1,4 @@
+// src/pages/Profile.jsx
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -9,14 +10,17 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // For photo preview & upload
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
+  // Calculate BMI
   const calculateBMI = (w, h) => {
     if (!w || !h) return null;
     const heightM = h / 100;
     return (w / (heightM * heightM)).toFixed(1);
   };
+
   const getBMICategory = (bmi) => {
     if (!bmi) return null;
     if (bmi < 18.5) return "Underweight";
@@ -25,14 +29,17 @@ export default function Profile() {
     return "Obese";
   };
 
+  // Save updated weight & height
   const handleSave = async () => {
     if (!weight || !height) {
       setMessage("Please enter both weight and height.");
       return;
     }
+
     try {
       setLoading(true);
       setMessage("");
+
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/${user.id}`,
         {
@@ -44,6 +51,7 @@ export default function Profile() {
           body: JSON.stringify({ weight: Number(weight), height: Number(height) }),
         }
       );
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update profile");
 
@@ -59,9 +67,9 @@ export default function Profile() {
     }
   };
 
+  // Handle photo upload
   const handlePhotoUpload = async () => {
     if (!selectedFile) return;
-
     const formData = new FormData();
     formData.append("photo", selectedFile);
 
@@ -94,26 +102,22 @@ export default function Profile() {
   const bmi = calculateBMI(weight, height);
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-center">Your Profile</h1>
 
-      <div className="p-6 bg-gray-50 rounded-lg shadow flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
-        {/* Profile Photo Section */}
-        <div className="flex flex-col items-center md:items-start mb-4">
+      <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
+        {/* Left: Profile Photo */}
+        <div className="flex flex-col items-center md:items-start">
           <img
-            src={
-              preview || user.profile_image
-                ? preview || `${import.meta.env.VITE_API_URL}${user.profile_image}`
-                : "/default-avatar.png"
-            }
+            src={preview || (user.profile_image ? `${import.meta.env.VITE_API_URL}${user.profile_image}` : "/default-avatar.png")}
             alt="Profile"
             className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
           />
           <input
             type="file"
             accept="image/*"
-            className="hidden"
             id="photo-upload"
+            className="hidden"
             onChange={(e) => {
               const file = e.target.files[0];
               if (!file) return;
@@ -127,7 +131,6 @@ export default function Profile() {
           >
             Choose Photo
           </label>
-
           {selectedFile && (
             <button
               onClick={handlePhotoUpload}
@@ -138,22 +141,16 @@ export default function Profile() {
           )}
         </div>
 
-        {/* User Info & Stats */}
+        {/* Right: User Info */}
         <div className="flex-1 space-y-4">
-          <p>
-            <strong>Name:</strong> {user.first_name} {user.last_name}
-          </p>
-          <p>
-            <strong>Username:</strong> {user.username}
-          </p>
-          <p>
-            <strong>Email:</strong> {user.email}
-          </p>
-          <p>
-            <strong>Age:</strong> {user.age || "N/A"} years
-          </p>
+          <div>
+            <p><strong>Name:</strong> {user.first_name} {user.last_name}</p>
+            <p><strong>Username:</strong> {user.username}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Age:</strong> {user.age || "N/A"} years</p>
+          </div>
 
-          {/* Weight, Height, BMI */}
+          {/* Weight / Height / BMI */}
           <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-2 sm:space-y-0">
             <div className="flex flex-col">
               <strong>Weight (kg):</strong>
@@ -203,6 +200,7 @@ export default function Profile() {
 
           {message && <p className="text-sm text-red-600">{message}</p>}
 
+          {/* Action Buttons */}
           {editing ? (
             <div className="flex flex-col sm:flex-row sm:space-x-2 mt-2 space-y-2 sm:space-y-0">
               <button
