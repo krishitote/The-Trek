@@ -10,7 +10,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // For photo preview & upload
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
@@ -29,17 +28,14 @@ export default function Profile() {
     return "Obese";
   };
 
-  // Save updated weight & height
   const handleSave = async () => {
     if (!weight || !height) {
       setMessage("Please enter both weight and height.");
       return;
     }
-
     try {
       setLoading(true);
       setMessage("");
-
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/${user.id}`,
         {
@@ -51,10 +47,8 @@ export default function Profile() {
           body: JSON.stringify({ weight: Number(weight), height: Number(height) }),
         }
       );
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update profile");
-
       setUser(data);
       localStorage.setItem("user", JSON.stringify(data));
       setMessage("Profile updated successfully!");
@@ -67,7 +61,6 @@ export default function Profile() {
     }
   };
 
-  // Handle photo upload
   const handlePhotoUpload = async () => {
     if (!selectedFile) return;
     const formData = new FormData();
@@ -79,7 +72,6 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${session.token}` },
         body: formData,
       });
-
       const data = await res.json();
       if (res.ok) {
         const updatedUser = { ...user, profile_image: data.profile_image };
@@ -97,21 +89,21 @@ export default function Profile() {
     }
   };
 
-  if (!user) return <p className="text-center mt-10">Loading profile...</p>;
+  if (!user) return <p className="text-center mt-10 text-gray-500">Loading profile...</p>;
 
   const bmi = calculateBMI(weight, height);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Profile</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Your Profile</h1>
 
-      <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
-        {/* Left: Profile Photo */}
+      <div className="bg-white rounded-2xl shadow-xl p-6 flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0">
+        {/* Profile Photo Section */}
         <div className="flex flex-col items-center md:items-start">
           <img
             src={preview || (user.profile_image ? `${import.meta.env.VITE_API_URL}${user.profile_image}` : "/default-avatar.png")}
             alt="Profile"
-            className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
+            className="w-36 h-36 rounded-full object-cover border-4 border-indigo-200 shadow-md"
           />
           <input
             type="file"
@@ -127,31 +119,31 @@ export default function Profile() {
           />
           <label
             htmlFor="photo-upload"
-            className="mt-2 cursor-pointer text-blue-600 hover:underline"
+            className="mt-3 cursor-pointer text-indigo-600 font-medium hover:text-indigo-800"
           >
             Choose Photo
           </label>
           {selectedFile && (
             <button
               onClick={handlePhotoUpload}
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
             >
               Upload Photo
             </button>
           )}
         </div>
 
-        {/* Right: User Info */}
-        <div className="flex-1 space-y-4">
-          <div>
-            <p><strong>Name:</strong> {user.first_name} {user.last_name}</p>
-            <p><strong>Username:</strong> {user.username}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Age:</strong> {user.age || "N/A"} years</p>
+        {/* User Info Section */}
+        <div className="flex-1 space-y-5">
+          <div className="space-y-2">
+            <p className="text-gray-700"><span className="font-semibold">Name:</span> {user.first_name} {user.last_name}</p>
+            <p className="text-gray-700"><span className="font-semibold">Username:</span> {user.username}</p>
+            <p className="text-gray-700"><span className="font-semibold">Email:</span> {user.email}</p>
+            <p className="text-gray-700"><span className="font-semibold">Age:</span> {user.age || "N/A"} years</p>
           </div>
 
           {/* Weight / Height / BMI */}
-          <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-2 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:space-x-8 space-y-3 sm:space-y-0">
             <div className="flex flex-col">
               <strong>Weight (kg):</strong>
               {editing ? (
@@ -159,7 +151,7 @@ export default function Profile() {
                   type="number"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
-                  className="border rounded px-2 py-1 w-24"
+                  className="border rounded px-3 py-1 w-28 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
                 />
               ) : (
                 <span>{weight || "N/A"}</span>
@@ -172,7 +164,7 @@ export default function Profile() {
                   type="number"
                   value={height}
                   onChange={(e) => setHeight(e.target.value)}
-                  className="border rounded px-2 py-1 w-24"
+                  className="border rounded px-3 py-1 w-28 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
                 />
               ) : (
                 <span>{height || "N/A"}</span>
@@ -181,7 +173,7 @@ export default function Profile() {
             <div className="flex flex-col">
               <strong>BMI:</strong>
               <span
-                className="ml-0 sm:ml-2 px-2 py-1 text-xs font-semibold text-white rounded-full mt-1 sm:mt-0"
+                className="ml-0 sm:ml-2 px-2 py-1 text-sm font-semibold text-white rounded-full mt-1 sm:mt-0"
                 style={{
                   backgroundColor:
                     bmi < 18.5
@@ -201,30 +193,32 @@ export default function Profile() {
           {message && <p className="text-sm text-red-600">{message}</p>}
 
           {/* Action Buttons */}
-          {editing ? (
-            <div className="flex flex-col sm:flex-row sm:space-x-2 mt-2 space-y-2 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0 mt-2">
+            {editing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+                >
+                  {loading ? "Saving..." : "Save"}
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg shadow hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
               <button
-                onClick={handleSave}
-                disabled={loading}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                onClick={() => setEditing(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
               >
-                {loading ? "Saving..." : "Save"}
+                Edit Weight & Height
               </button>
-              <button
-                onClick={() => setEditing(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setEditing(true)}
-              className="px-4 py-2 mt-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Edit Weight & Height
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
