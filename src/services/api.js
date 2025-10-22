@@ -62,7 +62,7 @@ export async function apiRegister({
   weight,
   height,
 }) {
-  const res = await fetch(`${API_URL}/register`, {
+  const res = await fetch(`${API_URL}/api/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -82,7 +82,7 @@ export async function apiRegister({
 
 // ---------- Leaderboards ----------
 export async function apiLeaderboards() {
-  const res = await fetch(`${API_URL}/leaderboards`);
+  const res = await fetch(`${API_URL}/api/leaderboards`);
   const data = await handleResponse(res);
   return {
     allTimeLeaders: data.allTimeLeaders || [],
