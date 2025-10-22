@@ -11,10 +11,10 @@ const router = express.Router();
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const { type, distance_km, duration_min, date } = req.body;
-    const userId = req.user.user_id;
+    const userId = req.user.id;
 
     const result = await pool.query(
-      `INSERT INTO activities (user_id, type, distance_km, duration_min, date)
+      `INSERT INTO activities (id, type, distance_km, duration_min, date)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [userId, type, distance_km, duration_min, date]
@@ -32,7 +32,7 @@ router.get("/:userId", authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
     const result = await pool.query(
-      "SELECT * FROM activities WHERE user_id = $1 ORDER BY date DESC",
+      "SELECT * FROM activities WHERE id = $1 ORDER BY date DESC",
       [userId]
     );
     res.json(result.rows);
