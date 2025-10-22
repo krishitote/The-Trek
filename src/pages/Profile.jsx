@@ -10,8 +10,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-
-  
   // Calculate BMI
   const calculateBMI = (w, h) => {
     if (!w || !h) return null;
