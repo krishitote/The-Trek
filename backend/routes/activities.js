@@ -5,17 +5,21 @@ import { authenticateToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Submit new activity
+// --- Submit new activity ---
 router.post("/", authenticateToken, async (req, res) => {
   try {
     const { type, distance_km, duration_min, date } = req.body;
-    const userId = req.userId; // pulled from token
+    const userId = req.user.id; // ✅ from token
+
+    if (!type || !distance_km || !duration_min) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
     const result = await pool.query(
       `INSERT INTO activities (user_id, type, distance_km, duration_min, date)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [userId, type, distance_km, duration_min, date]
+      [userId, type, distance_km, duration_min, date || new Date()]
     );
 
     res.json(result.rows[0]);
@@ -25,7 +29,7 @@ router.post("/", authenticateToken, async (req, res) => {
   }
 });
 
-// Get user activities
+// --- Get activities by user ---
 router.get("/:userId", authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
