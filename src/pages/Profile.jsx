@@ -1,6 +1,7 @@
 // src/pages/Profile.jsx
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import GoogleFitConnect from "../components/GoogleFitConnect";
 
 export default function Profile() {
   const { user, session, setUser } = useAuth();
@@ -28,6 +29,11 @@ export default function Profile() {
     return "Obese";
   };
 
+  // inside JSX
+<div className="mt-4">
+  <GoogleFitConnect />
+</div>
+  
   const handleSave = async () => {
     if (!weight || !height) {
       setMessage("Please enter both weight and height.");
