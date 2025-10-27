@@ -50,7 +50,7 @@ function App() {
           transition="color 0.2s"
         >
           <Link to="/" style={{ textDecoration: "none" }}>
-            The Trek App
+            The Trek
           </Link>
         </Heading>
 
@@ -106,7 +106,7 @@ function App() {
       {/* FOOTER */}
       <Box as="footer" mt={12} textAlign="center" opacity={0.6}>
         <Text fontSize="sm">
-          © {new Date().getFullYear()} The Trek App. All rights reserved.
+          © {new Date().getFullYear()} The Trek. All rights reserved.
         </Text>
       </Box>
     </Box>
