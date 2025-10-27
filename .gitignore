@@ -34,3 +34,12 @@ Thumbs.db
 
 # Coverage reports
 coverage/
+
+# --- Uploads folder handling ---
+# Ignore all files in uploads except .gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# --- Optional: If you have uploads outside backend ---
+uploads/*
+!uploads/.gitkeep
