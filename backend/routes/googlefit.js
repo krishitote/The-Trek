@@ -4,7 +4,6 @@ import pool from "../db.js";
 
 const router = express.Router();
 
-// 1️⃣ Callback: exchange auth code for tokens
 router.get("/callback", async (req, res) => {
   const { code } = req.query;
   try {
@@ -18,8 +17,6 @@ router.get("/callback", async (req, res) => {
 
     const { access_token, refresh_token, expires_in } = tokenRes.data;
 
-    // TODO: associate tokens with the logged-in user
-    // For now, just display success
     res.send(`<h2>✅ Google Fit Connected!</h2><p>You can close this window.</p>`);
   } catch (err) {
     console.error("❌ Google Fit OAuth failed:", err.response?.data || err.message);
@@ -27,7 +24,6 @@ router.get("/callback", async (req, res) => {
   }
 });
 
-// 2️⃣ Fetch activity data
 router.get("/sync", async (req, res) => {
   try {
     const accessToken = req.headers.authorization?.split(" ")[1];
@@ -58,8 +54,4 @@ router.get("/sync", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 export default router;
-=======
-export default router;
->>>>>>> 6cbbbaf (Added Google Fit and Uploads routes + updated backend files)
