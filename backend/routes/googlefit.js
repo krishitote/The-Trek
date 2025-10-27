@@ -58,4 +58,8 @@ router.get("/sync", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 export default router;
+=======
+export default router;
+>>>>>>> 6cbbbaf (Added Google Fit and Uploads routes + updated backend files)
