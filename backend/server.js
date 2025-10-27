@@ -5,38 +5,63 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {Pool} from "pg";
+import fs from "fs"; // ✅ added
+import path from "path"; // ✅ may be useful for uploads
+import { Pool } from "pg";
+
 import authRoutes from "./routes/auth.js";
 import activityRoutes from "./routes/activities.js";
 import userRoutes from "./routes/users.js";
-import uploadRoutes from "./routes/uploads.js";
+import uploadRoutes from "./routes/upload.js";
 import googleFitRoutes from "./routes/googlefit.js";
-
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+// ✅ Create uploads folder if it doesn’t exist (important for Render)
+const uploadDir = "./uploads";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+  console.log("📁 Created uploads folder on server.");
+}
+
+// ✅ CORS configuration
+const allowedOrigins = [
+  "https://the-trek.netlify.app", // your production frontend
+  "http://localhost:5173",        // for local testing
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+
 // PostgreSQL pool setup
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-//Middleware
-app.use(cors());
-app.use(express.json());
-
-// Routes
+// -------------------- Routes --------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/googlefit", googleFitRoutes);
 
-
-// Photo
+// ✅ Photo upload routes
 app.use("/api/upload", uploadRoutes);
-app.use("/uploads", express.static("uploads")); // serve static files
+app.use("/uploads", express.static("uploads")); // serve uploaded files
 
 // --- Health Check Route ---
 app.get("/api/health", async (req, res) => {
@@ -66,10 +91,9 @@ async function comparePassword(password, hash) {
 // Calculate BMI
 function calculateBMI(weight, height) {
   if (!weight || !height) return null;
-  // height is in cm, convert to meters
   const heightM = height / 100;
   const bmi = weight / (heightM * heightM);
-  return Math.round(bmi * 10) / 10; // round to 1 decimal place
+  return Math.round(bmi * 10) / 10;
 }
 
 // Middleware: authenticate
@@ -87,9 +111,7 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// -------------------- Routes --------------------
-
-// Test route
+// -------------------- Root Route --------------------
 app.get("/", (req, res) => {
   res.send("🚀 Trek backend is running!");
 });
@@ -135,7 +157,7 @@ app.post("/api/register", async (req, res) => {
     const user = result.rows[0];
     const token = generateToken(user);
     const bmi = calculateBMI(user.weight, user.height);
-    
+
     res.json({ token, user: { ...user, bmi } });
   } catch (err) {
     console.error(err);
@@ -224,7 +246,6 @@ app.post("/api/activities", authMiddleware, async (req, res) => {
 // -------------------- Leaderboards --------------------
 app.get("/api/leaderboards", async (req, res) => {
   try {
-    // Top 3 All-time leaders
     const allTime = await pool.query(`
       SELECT u.id as user_id, u.username, u.gender,
              SUM(a.distance_km) AS total_distance,
@@ -237,7 +258,6 @@ app.get("/api/leaderboards", async (req, res) => {
       LIMIT 3
     `);
 
-    // Leaders per activity type
     const perActivity = await pool.query(`
       SELECT a.type, u.id as user_id, u.username, u.gender,
              SUM(a.distance_km) AS total_distance,
@@ -249,7 +269,6 @@ app.get("/api/leaderboards", async (req, res) => {
       ORDER BY a.type, total_distance DESC
     `);
 
-    // Leaders per gender
     const perGender = await pool.query(`
       SELECT u.gender, u.id as user_id, u.username,
              SUM(a.distance_km) AS total_distance,
@@ -275,14 +294,12 @@ app.get("/api/leaderboards", async (req, res) => {
 // -------------------- Update User Weight & Height --------------------
 app.put("/api/users/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  let { weight, height } = req.body; // note: let so we can convert below
+  let { weight, height } = req.body;
 
-  // Only allow users to update their own profile
   if (parseInt(id) !== req.userId) {
     return res.status(403).json({ error: "You can only update your own profile" });
   }
 
-  // Convert empty strings to null and ensure numbers
   weight = weight !== undefined && weight !== "" ? Number(weight) : null;
   height = height !== undefined && height !== "" ? Number(height) : null;
 
@@ -306,7 +323,7 @@ app.put("/api/users/:id", authMiddleware, async (req, res) => {
       idx++;
     }
 
-    values.push(req.userId); // for WHERE clause
+    values.push(req.userId);
 
     const result = await pool.query(
       `UPDATE users 
@@ -330,7 +347,7 @@ app.put("/api/users/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// -------------------- Start server --------------------
+// -------------------- Start Server --------------------
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
 });
