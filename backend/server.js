@@ -10,6 +10,7 @@ import authRoutes from "./routes/auth.js";
 import activityRoutes from "./routes/activities.js";
 import userRoutes from "./routes/users.js";
 import uploadRoutes from "./routes/upload.js";
+import googleFitRoutes from "./routes/googlefit.js";
 
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/googlefit", googleFitRoutes);
 
 // Photo
 app.use("/api/upload", uploadRoutes);
