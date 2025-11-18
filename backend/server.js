@@ -14,6 +14,7 @@ import activityRoutes from "./routes/activities.js";
 import userRoutes from "./routes/users.js";
 import uploadRoutes from "./routes/upload.js";
 import googleFitRoutes from "./routes/googlefit.js";
+import leaderboardRoutes from "./routes/leaderboards.js";
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ const pool = new pg.Pool({
 app.use("/api/auth", authRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/leaderboards", leaderboardRoutes);
 app.use("/api/googlefit", googleFitRoutes);
 
 // ✅ Photo upload routes
@@ -240,54 +242,6 @@ app.post("/api/activities", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to submit activity" });
-  }
-});
-
-// -------------------- Leaderboards --------------------
-app.get("/api/leaderboards", async (req, res) => {
-  try {
-    const allTime = await pool.query(`
-      SELECT u.id as user_id, u.username, u.gender,
-             SUM(a.distance_km) AS total_distance,
-             AVG(a.duration_min / NULLIF(a.distance_km,0)) AS avg_pace
-      FROM activities a
-      JOIN users u ON a.user_id = u.id
-      WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps')
-      GROUP BY u.id, u.username, u.gender
-      ORDER BY total_distance DESC
-      LIMIT 3
-    `);
-
-    const perActivity = await pool.query(`
-      SELECT a.type, u.id as user_id, u.username, u.gender,
-             SUM(a.distance_km) AS total_distance,
-             AVG(a.duration_min / NULLIF(a.distance_km,0)) AS avg_pace
-      FROM activities a
-      JOIN users u ON a.user_id = u.id
-      WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps')
-      GROUP BY a.type, u.id, u.username, u.gender
-      ORDER BY a.type, total_distance DESC
-    `);
-
-    const perGender = await pool.query(`
-      SELECT u.gender, u.id as user_id, u.username,
-             SUM(a.distance_km) AS total_distance,
-             AVG(a.duration_min / NULLIF(a.distance_km,0)) AS avg_pace
-      FROM activities a
-      JOIN users u ON a.user_id = u.id
-      WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps')
-      GROUP BY u.gender, u.id, u.username
-      ORDER BY u.gender, total_distance DESC
-    `);
-
-    res.json({
-      allTimeLeaders: allTime.rows,
-      perActivity: perActivity.rows,
-      perGender: perGender.rows,
-    });
-  } catch (err) {
-    console.error("Error fetching leaderboards:", err);
-    res.status(500).json({ error: "Failed to fetch leaderboards" });
   }
 });
 

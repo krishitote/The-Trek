@@ -2,6 +2,7 @@
 import express from "express";
 import pool from "../db.js";
 import { authenticateToken } from "../middleware/authMiddleware.js";
+import { validateActivity } from '../middleware/validation.js';
 
 const router = express.Router();
 
