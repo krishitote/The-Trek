@@ -30,8 +30,10 @@ if (!fs.existsSync(uploadDir)) {
 
 // ✅ CORS configuration
 const allowedOrigins = [
-  "https://the-trek.netlify.app", // your production frontend
-  "http://localhost:5173",        // for local testing
+  "https://trekfit.co.ke",          // ✅ Production domain
+  "https://www.trekfit.co.ke",      // ✅ www version
+  "https://the-trek.netlify.app",   // Keep as backup
+  "http://localhost:5173",          // For local testing
 ];
 
 app.use(
