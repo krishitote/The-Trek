@@ -3,45 +3,31 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Heading,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   Text,
   VStack,
   HStack,
   Spinner,
-  Button,
-  Divider,
-  Flex,
-  Stack,
+  Badge,
+  Avatar,
+  SimpleGrid,
+  Container,
 } from "@chakra-ui/react";
 import { apiLeaderboards } from "../services/api";
 
 /**
- * Home page: All-Time (top 5 with podium), Activity, Gender tabs.
- * - Fetches /api/leaderboards once and caches results.
- * - Uses client-side filtering for activity/gender lists (no reverting tabs).
+ * Home page: Leaderboards with hero section, podium, and activity/gender cards
  */
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [allTime, setAllTime] = useState([]); // array of { user_id, username, total_distance, ... }
-  const [perActivityData, setPerActivityData] = useState([]); // array of { type, user_id, username, total_distance, ... }
-  const [perGenderData, setPerGenderData] = useState([]); // array of { gender, user_id, username, total_distance, ... }
+  const [allTime, setAllTime] = useState([]);
+  const [perActivityData, setPerActivityData] = useState([]);
+  const [perGenderData, setPerGenderData] = useState([]);
 
-  const [activityTypes, setActivityTypes] = useState([]); // unique activity names
-  const [genderTypes, setGenderTypes] = useState([]); // unique genders
-
-  const [tabIndex, setTabIndex] = useState(0); // 0=All Time, 1=Activity, 2=Gender
-
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [selectedGender, setSelectedGender] = useState(null);
-
-  const [displayedLeaders, setDisplayedLeaders] = useState([]); // leaders shown in the current panel
+  const [activityTypes, setActivityTypes] = useState([]);
+  const [genderTypes, setGenderTypes] = useState([]);
 
   // Fetch and cache everything once on mount
   useEffect(() => {
@@ -53,20 +39,12 @@ export default function Home() {
         const data = await apiLeaderboards();
         if (cancelled) return;
 
-        const at = data.allTimeLeaders || [];
-        const pa = data.perActivity || [];
-        const pg = data.perGender || [];
+        setAllTime(data.allTimeLeaders || []);
+        setPerActivityData(data.perActivity || []);
+        setPerGenderData(data.perGender || []);
 
-        setAllTime(at);
-        setPerActivityData(pa);
-        setPerGenderData(pg);
-
-        // extract unique activity and gender types
-        setActivityTypes([...new Set(pa.map((r) => r.type).filter(Boolean))]);
-        setGenderTypes([...new Set(pg.map((r) => r.gender).filter(Boolean))]);
-
-        // default display: top 5 all-time
-        setDisplayedLeaders(at.slice(0, 5));
+        setActivityTypes([...new Set((data.perActivity || []).map((r) => r.type).filter(Boolean))]);
+        setGenderTypes([...new Set((data.perGender || []).map((r) => r.gender).filter(Boolean))]);
       } catch (err) {
         console.error("Failed to load leaderboards", err);
         setError("Failed to load leaderboard data");
@@ -80,275 +58,263 @@ export default function Home() {
     };
   }, []);
 
-  // When tab changes, ensure sensible defaults and update displayedLeaders
-  useEffect(() => {
-    if (tabIndex === 0) {
-      setDisplayedLeaders(allTime.slice(0, 5));
-      return;
-    }
-
-    if (tabIndex === 1) {
-      // Activity tab: default to first activity if none selected
-      if (!selectedActivity && activityTypes.length > 0) {
-        const first = activityTypes[0];
-        setSelectedActivity(first);
-        const list = perActivityData.filter((r) => r.type === first).slice(0, 10);
-        setDisplayedLeaders(list);
-      } else if (selectedActivity) {
-        setDisplayedLeaders(perActivityData.filter((r) => r.type === selectedActivity).slice(0, 10));
-      } else {
-        setDisplayedLeaders([]);
-      }
-      return;
-    }
-
-    if (tabIndex === 2) {
-      // Gender tab: default to first gender if none selected
-      if (!selectedGender && genderTypes.length > 0) {
-        const first = genderTypes[0];
-        setSelectedGender(first);
-        const list = perGenderData.filter((r) => r.gender === first).slice(0, 10);
-        setDisplayedLeaders(list);
-      } else if (selectedGender) {
-        setDisplayedLeaders(perGenderData.filter((r) => r.gender === selectedGender).slice(0, 10));
-      } else {
-        setDisplayedLeaders([]);
-      }
-      return;
-    }
-  }, [
-    tabIndex,
-    allTime,
-    perActivityData,
-    perGenderData,
-    activityTypes,
-    genderTypes,
-    selectedActivity,
-    selectedGender,
-  ]);
-
-  // Handlers to select activity/gender (keeps tabIndex unchanged)
-  function handleSelectActivity(type) {
-    setSelectedActivity(type);
-    const list = perActivityData.filter((r) => r.type === type).slice(0, 10);
-    setDisplayedLeaders(list);
-  }
-
-  function handleSelectGender(g) {
-    setSelectedGender(g);
-    const list = perGenderData.filter((r) => r.gender === g).slice(0, 10);
-    setDisplayedLeaders(list);
-  }
-
-  // Helpers to render lists / podium
-  const renderPodium = (arr) => {
-    // arr is allTime array; ensure at least empty placeholders
-    const top5 = arr.slice(0, 5);
-    const top3 = top5.slice(0, 3);
-
-    // helper to get display values
-    const name = (u) => u?.username || u?.name || "Anonymous";
-    const pts = (u) => (u?.total_distance ?? u?.total ?? 0);
-
-    return (
-      <Box mb={6}>
-        <Flex justify="center" align="flex-end" gap={6}>
-          {/* Silver */}
-          <Box textAlign="center">
-            <Box borderTopRadius="md" bg="gray.200" px={3} py={2} fontWeight="bold">
-              🥈
-            </Box>
-            <Box
-              w="80px"
-              h="120px"
-              bg="gray.50"
-              borderTop="6px solid"
-              borderColor="gray.400"
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              borderBottomRadius="md"
-            >
-              <Text fontWeight="semibold">{name(top3[1])}</Text>
-              <Text fontSize="sm" color="gray.600">{pts(top3[1])}</Text>
-            </Box>
-          </Box>
-
-          {/* Gold (center) */}
-          <Box textAlign="center">
-            <Box borderTopRadius="md" bg="yellow.300" px={4} py={2} fontWeight="bold">
-              🥇
-            </Box>
-            <Box
-              w="100px"
-              h="160px"
-              bg="yellow.50"
-              borderTop="6px solid"
-              borderColor="yellow.400"
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              borderBottomRadius="md"
-            >
-              <Text fontWeight="semibold">{name(top3[0])}</Text>
-              <Text fontSize="sm" color="gray.700">{pts(top3[0])}</Text>
-            </Box>
-          </Box>
-
-          {/* Bronze */}
-          <Box textAlign="center">
-            <Box borderTopRadius="md" bg="orange.200" px={3} py={2} fontWeight="bold">
-              🥉
-            </Box>
-            <Box
-              w="80px"
-              h="100px"
-              bg="orange.50"
-              borderTop="6px solid"
-              borderColor="orange.400"
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              borderBottomRadius="md"
-            >
-              <Text fontWeight="semibold">{name(top3[2])}</Text>
-              <Text fontSize="sm" color="gray.600">{pts(top3[2])}</Text>
-            </Box>
-          </Box>
-        </Flex>
-      </Box>
-    );
-  };
-
-  const renderList = (arr, limit = 10) => {
-    if (!arr || arr.length === 0) {
-      return <Text color="gray.500">No data available</Text>;
-    }
-    return (
-      <VStack spacing={3} align="stretch" mt={4}>
-        {arr.slice(0, limit).map((u, i) => (
-          <Flex
-            key={u.user_id ?? u.id ?? `${i}-${u.username ?? "u"}`}
-            justify="space-between"
-            align="center"
-            p={3}
-            bg={i < 3 ? "teal.50" : "white"}
-            borderRadius="md"
-            boxShadow="sm"
-          >
-            <Text fontWeight={i < 3 ? "semibold" : "normal"}>
-              #{i + 1} {u.username ?? u.name ?? "Anonymous"}
-            </Text>
-            <Text color="teal.600" fontWeight="semibold">
-              {(u.total_distance ?? u.total ?? 0).toFixed ? (Number(u.total_distance ?? u.total ?? 0)).toFixed(2) : (u.total_distance ?? u.total ?? 0)}
-            </Text>
-          </Flex>
-        ))}
-      </VStack>
-    );
-  };
-
   // UI
   if (loading) {
     return (
       <Box textAlign="center" mt={8}>
-        <Spinner size="lg" color="teal.500" />
+        <Spinner size="xl" color="brand.forest" thickness="4px" />
+        <Text mt={4} color="gray.600">Loading leaderboards...</Text>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box textAlign="center" mt={8}>
-        <Text color="red.500">{error}</Text>
+      <Box textAlign="center" mt={8} p={8}>
+        <Text color="red.500" fontSize="xl">{error}</Text>
       </Box>
     );
   }
 
+  // Get activity icon
+  const getActivityIcon = (type) => {
+    const icons = {
+      Running: "🏃",
+      Cycling: "🚴",
+      Swimming: "🏊",
+      Walking: "🚶",
+      Hiking: "🥾"
+    };
+    return icons[type] || "🏃";
+  };
+
+  // Get activity color
+  const getActivityColor = (type) => {
+    const colors = {
+      Running: "brand.forest",
+      Cycling: "energy.sunrise",
+      Swimming: "sky.azure",
+      Walking: "brand.pine",
+      Hiking: "earth.stone"
+    };
+    return colors[type] || "brand.forest";
+  };
+
   return (
-    <Box maxW="900px" mx="auto" p={6}>
-      <Heading textAlign="center" mb={6} color="teal.600">
-        Leaderboards
-      </Heading>
+    <Box>
+      {/* Hero Section */}
+      <Box
+        bgGradient="linear(to-br, brand.forest, brand.pine)"
+        color="white"
+        py={{ base: 12, md: 20 }}
+        px={8}
+        textAlign="center"
+        position="relative"
+        overflow="hidden"
+      >
+        <Container maxW="container.xl">
+          <Heading
+            size="2xl"
+            fontWeight="900"
+            bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+            bgClip="text"
+            mb={4}
+          >
+            The Trek Leaderboard
+          </Heading>
+          <Text fontSize={{ base: "lg", md: "xl" }} opacity={0.9}>
+            🌲 Track. Compete. Conquer Nature. 🏔️
+          </Text>
+        </Container>
+      </Box>
 
-      <Tabs index={tabIndex} onChange={(i) => setTabIndex(i)} isFitted variant="enclosed-colored" colorScheme="teal">
-        <TabList mb={4}>
-          <Tab fontWeight="bold">All Time</Tab>
-          <Tab fontWeight="bold">Activity</Tab>
-          <Tab fontWeight="bold">Gender</Tab>
-        </TabList>
+      <Container maxW="container.xl" py={12}>
+        {/* Top 3 Podium */}
+        <Heading size="lg" textAlign="center" mb={8} color="brand.forest">
+          🏆 Top 3 Champions
+        </Heading>
+        
+        <HStack spacing={{ base: 4, md: 8 }} justify="center" mb={16} flexWrap="wrap">
+          {/* 2nd Place */}
+          {allTime[1] && (
+            <VStack spacing={3}>
+              <Box
+                bg="gray.100"
+                w="80px"
+                h="100px"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                boxShadow="md"
+              >
+                <Text fontSize="4xl">🥈</Text>
+              </Box>
+              <Avatar 
+                size="lg" 
+                name={allTime[1].username}
+                src={allTime[1].profile_image ? `${import.meta.env.VITE_API_URL}${allTime[1].profile_image}` : undefined}
+              />
+              <Text fontWeight="bold" fontSize="md">{allTime[1].username}</Text>
+              <Badge colorScheme="gray" fontSize="md" px={3} borderRadius="full">
+                {Number(allTime[1].total_distance || 0).toFixed(1)} km
+              </Badge>
+            </VStack>
+          )}
 
-        <TabPanels>
-          {/* All Time */}
-          <TabPanel>
-            <Heading size="md" mb={3}>🏆 Top 5 — All Time</Heading>
-            {renderPodium(allTime)}
-            <Divider my={4} />
-            {renderList(allTime.slice(0, 5), 5)}
-          </TabPanel>
+          {/* 1st Place - Elevated */}
+          {allTime[0] && (
+            <VStack spacing={3}>
+              <Box
+                bgGradient="linear(to-br, energy.sunrise, energy.amber)"
+                w="100px"
+                h="140px"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                boxShadow="2xl"
+              >
+                <Text fontSize="5xl">🥇</Text>
+              </Box>
+              <Avatar 
+                size="2xl" 
+                name={allTime[0].username}
+                src={allTime[0].profile_image ? `${import.meta.env.VITE_API_URL}${allTime[0].profile_image}` : undefined}
+                border="4px solid"
+                borderColor="energy.sunrise"
+              />
+              <Text fontWeight="black" fontSize="xl">{allTime[0].username}</Text>
+              <Badge colorScheme="orange" fontSize="lg" px={4} borderRadius="full">
+                {Number(allTime[0].total_distance || 0).toFixed(1)} km
+              </Badge>
+            </VStack>
+          )}
 
-          {/* Activity */}
-          <TabPanel>
-            <Heading size="md" mb={3}>💪 Leaders by Activity</Heading>
+          {/* 3rd Place */}
+          {allTime[2] && (
+            <VStack spacing={3}>
+              <Box
+                bg="orange.100"
+                w="80px"
+                h="80px"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                boxShadow="md"
+              >
+                <Text fontSize="4xl">🥉</Text>
+              </Box>
+              <Avatar 
+                size="lg" 
+                name={allTime[2].username}
+                src={allTime[2].profile_image ? `${import.meta.env.VITE_API_URL}${allTime[2].profile_image}` : undefined}
+              />
+              <Text fontWeight="bold" fontSize="md">{allTime[2].username}</Text>
+              <Badge colorScheme="orange" fontSize="md" px={3} borderRadius="full">
+                {Number(allTime[2].total_distance || 0).toFixed(1)} km
+              </Badge>
+            </VStack>
+          )}
+        </HStack>
 
-            <HStack spacing={3} wrap="wrap" mb={4}>
-              {activityTypes.length === 0 ? (
-                <Text color="gray.500">No activity types available</Text>
-              ) : (
-                activityTypes.map((t) => (
-                  <Button
-                    key={t}
-                    size="sm"
-                    colorScheme={selectedActivity === t ? "teal" : "gray"}
-                    variant={selectedActivity === t ? "solid" : "outline"}
-                    onClick={() => handleSelectActivity(t)}
-                  >
-                    {t}
-                  </Button>
-                ))
-              )}
-            </HStack>
+        {/* Activity Type Leaders */}
+        <Heading size="lg" textAlign="center" mb={8} color="brand.forest">
+          🏃 Leaders by Activity
+        </Heading>
 
-            <Divider mb={3} />
-            <Text fontSize="sm" color="gray.600" mb={2}>
-              {selectedActivity ? `${selectedActivity} leaders` : "Select an activity"}
-            </Text>
-            {renderList(displayedLeaders, 10)}
-          </TabPanel>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} mb={16}>
+          {activityTypes.map((type) => {
+            const leaders = perActivityData.filter(r => r.type === type).slice(0, 5);
+            return (
+              <Box
+                key={type}
+                bg="white"
+                p={6}
+                borderRadius="2xl"
+                boxShadow="md"
+                cursor="pointer"
+                transition="all 0.3s"
+                _hover={{ transform: "translateY(-4px)", boxShadow: "xl" }}
+                border="2px solid"
+                borderColor={getActivityColor(type)}
+              >
+                <HStack mb={4}>
+                  <Text fontSize="3xl">{getActivityIcon(type)}</Text>
+                  <Heading size="md" color={getActivityColor(type)}>{type}</Heading>
+                </HStack>
+                <VStack align="stretch" spacing={3}>
+                  {leaders.map((user, idx) => (
+                    <HStack key={user.user_id} justify="space-between">
+                      <HStack>
+                        <Badge 
+                          colorScheme={idx === 0 ? "orange" : "green"} 
+                          borderRadius="full" 
+                          px={2}
+                        >
+                          #{idx + 1}
+                        </Badge>
+                        <Text fontWeight="medium" fontSize="sm">{user.username}</Text>
+                      </HStack>
+                      <Text fontWeight="bold" color={getActivityColor(type)} fontSize="sm">
+                        {Number(user.total_distance || 0).toFixed(1)} km
+                      </Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            );
+          })}
+        </SimpleGrid>
 
-          {/* Gender */}
-          <TabPanel>
-            <Heading size="md" mb={3}>🚹🚺 Leaders by Gender</Heading>
+        {/* Gender Leaders */}
+        <Heading size="lg" textAlign="center" mb={8} color="brand.forest">
+          🚹🚺 Leaders by Gender
+        </Heading>
 
-            <HStack spacing={3} mb={4}>
-              {genderTypes.length === 0 ? (
-                <Text color="gray.500">No gender data</Text>
-              ) : (
-                genderTypes.map((g) => (
-                  <Button
-                    key={g}
-                    size="sm"
-                    colorScheme={selectedGender === g ? "teal" : "gray"}
-                    variant={selectedGender === g ? "solid" : "outline"}
-                    onClick={() => handleSelectGender(g)}
-                  >
-                    {g}
-                  </Button>
-                ))
-              )}
-            </HStack>
-
-            <Divider mb={3} />
-            <Text fontSize="sm" color="gray.600" mb={2}>
-              {selectedGender ? `${selectedGender} leaders` : "Select a gender"}
-            </Text>
-            {renderList(displayedLeaders, 10)}
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+          {genderTypes.map((gender) => {
+            const leaders = perGenderData.filter(r => r.gender === gender).slice(0, 10);
+            return (
+              <Box
+                key={gender}
+                bg="white"
+                p={6}
+                borderRadius="2xl"
+                boxShadow="md"
+                border="2px solid"
+                borderColor="sky.azure"
+              >
+                <Heading size="md" mb={4} color="sky.azure">
+                  {gender === "Male" ? "🚹 Male" : "🚺 Female"} Leaders
+                </Heading>
+                <VStack align="stretch" spacing={2}>
+                  {leaders.map((user, idx) => (
+                    <HStack key={user.user_id} justify="space-between" p={2} borderRadius="md" bg={idx < 3 ? "sky.50" : "transparent"}>
+                      <HStack>
+                        <Badge 
+                          colorScheme={idx === 0 ? "orange" : idx < 3 ? "blue" : "gray"} 
+                          borderRadius="full" 
+                          px={2}
+                        >
+                          #{idx + 1}
+                        </Badge>
+                        <Text fontWeight={idx < 3 ? "bold" : "medium"} fontSize="sm">
+                          {user.username}
+                        </Text>
+                      </HStack>
+                      <Text fontWeight="bold" color="sky.azure" fontSize="sm">
+                        {Number(user.total_distance || 0).toFixed(1)} km
+                      </Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            );
+          })}
+        </SimpleGrid>
+      </Container>
     </Box>
   );
 }

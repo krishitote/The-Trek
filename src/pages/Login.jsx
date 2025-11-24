@@ -60,46 +60,88 @@ try {
 };
 
 return (
-<Box
-maxW="md"
-mx="auto"
-mt={16}
-p={8}
-borderRadius="xl"
-boxShadow="lg"
-bg="white"
-_dark={{ bg: "gray.700" }}
->
-<Heading textAlign="center" mb={6} color="brand.600" _dark={{ color: "brand.300" }}>
-Login
-</Heading>
-<form onSubmit={handleSubmit}>
-<VStack spacing={4}>
-<FormControl isRequired>
-<FormLabel>Username</FormLabel>
-<Input name="username" placeholder="Enter your username" value={form.username} onChange={handleChange} />
-</FormControl>
-      <FormControl isRequired>
-        <FormLabel>Password</FormLabel>
-        <Input
-          name="password"
-          type="password"
-          placeholder="Enter your password"
-          value={form.password}
-          onChange={handleChange}
-        />
-      </FormControl>
+<Box>
+  {/* Hero Section */}
+  <Box
+    bgGradient="linear(to-br, brand.forest, brand.pine)"
+    color="white"
+    py={16}
+    px={8}
+    textAlign="center"
+    mb={-8}
+  >
+    <Heading
+      size="2xl"
+      fontWeight="900"
+      bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+      bgClip="text"
+      mb={2}
+    >
+      Welcome Back, Trekker!
+    </Heading>
+    <Box fontSize="lg" opacity={0.9}>
+      🏔️ Continue your fitness journey
+    </Box>
+  </Box>
 
-      <Button
-        type="submit"
-        colorScheme="green"
-        w="full"
-        isDisabled={loading}
-      >
-        {loading ? <Spinner size="sm" /> : "Login"}
-      </Button>
-    </VStack>
-  </form>
+  {/* Login Form */}
+  <Box
+    maxW="md"
+    mx="auto"
+    mt={-4}
+    p={8}
+    borderRadius="2xl"
+    boxShadow="2xl"
+    bg="white"
+    border="3px solid"
+    borderColor="energy.sunrise"
+  >
+    <form onSubmit={handleSubmit}>
+      <VStack spacing={5}>
+        <FormControl isRequired>
+          <FormLabel fontWeight="bold" color="brand.forest">Username</FormLabel>
+          <Input
+            name="username"
+            placeholder="Enter your username"
+            value={form.username}
+            onChange={handleChange}
+            size="lg"
+            focusBorderColor="brand.forest"
+          />
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel fontWeight="bold" color="brand.forest">Password</FormLabel>
+          <Input
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={handleChange}
+            size="lg"
+            focusBorderColor="brand.forest"
+          />
+        </FormControl>
+
+        <Button
+          type="submit"
+          w="full"
+          size="lg"
+          bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+          color="white"
+          fontWeight="bold"
+          borderRadius="full"
+          _hover={{
+            bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+            transform: "scale(1.02)"
+          }}
+          isDisabled={loading}
+        >
+          {loading ? <Spinner size="sm" /> : "🚀 Login"}
+        </Button>
+      </VStack>
+    </form>
+  </Box>
 </Box>
 );
 }

@@ -2,14 +2,28 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import GoogleFitConnect from "../components/GoogleFitConnect";
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+  Button,
+  Input,
+  Avatar,
+  Badge,
+  SimpleGrid,
+  Container,
+  useToast,
+} from "@chakra-ui/react";
 
 export default function Profile() {
   const { user, session, setUser } = useAuth();
+  const toast = useToast();
   const [weight, setWeight] = useState(user?.weight || "");
   const [height, setHeight] = useState(user?.height || "");
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -29,19 +43,27 @@ export default function Profile() {
     return "Obese";
   };
 
-  // inside JSX
-<div className="mt-4">
-  <GoogleFitConnect />
-</div>
-  
+  const getBMIColor = (bmi) => {
+    if (!bmi) return "gray";
+    if (bmi < 18.5) return "blue";
+    if (bmi < 25) return "green";
+    if (bmi < 30) return "orange";
+    return "red";
+  };
+
   const handleSave = async () => {
     if (!weight || !height) {
-      setMessage("Please enter both weight and height.");
+      toast({
+        title: "Missing information",
+        description: "Please enter both weight and height.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
     try {
       setLoading(true);
-      setMessage("");
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/${user.id}`,
         {
@@ -57,11 +79,23 @@ export default function Profile() {
       if (!res.ok) throw new Error(data.error || "Failed to update profile");
       setUser(data);
       localStorage.setItem("user", JSON.stringify(data));
-      setMessage("Profile updated successfully!");
+      toast({
+        title: "Success!",
+        description: "Profile updated successfully!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
       setEditing(false);
     } catch (err) {
       console.error(err);
-      setMessage(err.message || "Failed to update profile");
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update profile",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -85,148 +119,331 @@ export default function Profile() {
         localStorage.setItem("user", JSON.stringify(updatedUser));
         setSelectedFile(null);
         setPreview(null);
-        alert("Photo uploaded successfully!");
+        toast({
+          title: "Success!",
+          description: "Photo uploaded successfully!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
-        alert("Failed to upload photo");
+        toast({
+          title: "Error",
+          description: "Failed to upload photo",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (err) {
       console.error(err);
-      alert("Error uploading photo");
+      toast({
+        title: "Error",
+        description: "Error uploading photo",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
-  if (!user) return <p className="text-center mt-10 text-gray-500">Loading profile...</p>;
+  if (!user) {
+    return (
+      <Box textAlign="center" mt={10}>
+        <Text color="gray.500">Loading profile...</Text>
+      </Box>
+    );
+  }
 
   const bmi = calculateBMI(weight, height);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Your Profile</h1>
+    <Box>
+      {/* Profile Header with Gradient Background */}
+      <Box
+        bgGradient="linear(to-br, brand.forest, brand.pine)"
+        color="white"
+        py={12}
+        px={8}
+        mb={8}
+      >
+        <Container maxW="container.xl">
+          <VStack spacing={4}>
+            <Box position="relative">
+              <Avatar
+                size="2xl"
+                name={user.username}
+                src={preview || (user.profile_image ? `${import.meta.env.VITE_API_URL}${user.profile_image}` : undefined)}
+                border="6px solid"
+                borderColor="energy.sunrise"
+                boxShadow="xl"
+              />
+              <Badge
+                position="absolute"
+                bottom={0}
+                right={0}
+                colorScheme="orange"
+                fontSize="md"
+                borderRadius="full"
+                px={3}
+              >
+                🏆 Trekker
+              </Badge>
+            </Box>
+            <Heading size="xl" fontWeight="black">{user.username}</Heading>
+            <Text opacity={0.9}>{user.email}</Text>
+            
+            {/* Photo Upload */}
+            <VStack spacing={2}>
+              <Input
+                type="file"
+                accept="image/*"
+                id="photo-upload"
+                display="none"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  setSelectedFile(file);
+                  setPreview(URL.createObjectURL(file));
+                }}
+              />
+              <Button
+                as="label"
+                htmlFor="photo-upload"
+                size="sm"
+                variant="outline"
+                borderColor="white"
+                color="white"
+                _hover={{ bg: "whiteAlpha.200" }}
+                cursor="pointer"
+              >
+                📷 Choose Photo
+              </Button>
+              {selectedFile && (
+                <Button
+                  size="sm"
+                  bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+                  color="white"
+                  _hover={{
+                    bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+                  }}
+                  onClick={handlePhotoUpload}
+                >
+                  Upload Photo
+                </Button>
+              )}
+            </VStack>
+          </VStack>
+        </Container>
+      </Box>
 
-      <div className="bg-white rounded-2xl shadow-xl p-6 flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0">
-        {/* Profile Photo Section */}
-        <div className="flex flex-col items-center md:items-start">
-          <img
-            src={preview || (user.profile_image ? `${import.meta.env.VITE_API_URL}${user.profile_image}` : "/default-avatar.png")}
-            alt="Profile"
-            className="w-36 h-36 rounded-full object-cover border-4 border-indigo-200 shadow-md"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            id="photo-upload"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (!file) return;
-              setSelectedFile(file);
-              setPreview(URL.createObjectURL(file));
-            }}
-          />
-          <label
-            htmlFor="photo-upload"
-            className="mt-3 cursor-pointer text-indigo-600 font-medium hover:text-indigo-800"
+      <Container maxW="container.xl" pb={12}>
+        {/* Stats Cards with Health Metrics */}
+        <Heading size="lg" mb={6} color="brand.forest">
+          📊 Health Stats
+        </Heading>
+        
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
+          {/* Weight Card */}
+          <Box
+            bg="white"
+            p={6}
+            borderRadius="xl"
+            boxShadow="md"
+            borderTop="4px solid"
+            borderTopColor="brand.forest"
           >
-            Choose Photo
-          </label>
-          {selectedFile && (
-            <button
-              onClick={handlePhotoUpload}
-              className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
-            >
-              Upload Photo
-            </button>
-          )}
-        </div>
-
-        {/* User Info Section */}
-        <div className="flex-1 space-y-5">
-          <div className="space-y-2">
-            <p className="text-gray-700"><span className="font-semibold">Name:</span> {user.first_name} {user.last_name}</p>
-            <p className="text-gray-700"><span className="font-semibold">Username:</span> {user.username}</p>
-            <p className="text-gray-700"><span className="font-semibold">Email:</span> {user.email}</p>
-            <p className="text-gray-700"><span className="font-semibold">Age:</span> {user.age || "N/A"} years</p>
-          </div>
-
-          {/* Weight / Height / BMI */}
-          <div className="flex flex-col sm:flex-row sm:space-x-8 space-y-3 sm:space-y-0">
-            <div className="flex flex-col">
-              <strong>Weight (kg):</strong>
+            <VStack spacing={3}>
+              <Text fontSize="4xl">⚖️</Text>
+              <Text fontSize="sm" color="gray.600" fontWeight="medium">Weight</Text>
               {editing ? (
-                <input
+                <Input
                   type="number"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
-                  className="border rounded px-3 py-1 w-28 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+                  size="lg"
+                  textAlign="center"
+                  fontWeight="bold"
+                  color="brand.forest"
                 />
               ) : (
-                <span>{weight || "N/A"}</span>
+                <Heading size="lg" color="brand.forest">
+                  {weight || "N/A"} {weight && "kg"}
+                </Heading>
               )}
-            </div>
-            <div className="flex flex-col">
-              <strong>Height (cm):</strong>
+            </VStack>
+          </Box>
+
+          {/* Height Card */}
+          <Box
+            bg="white"
+            p={6}
+            borderRadius="xl"
+            boxShadow="md"
+            borderTop="4px solid"
+            borderTopColor="energy.sunrise"
+          >
+            <VStack spacing={3}>
+              <Text fontSize="4xl">📏</Text>
+              <Text fontSize="sm" color="gray.600" fontWeight="medium">Height</Text>
               {editing ? (
-                <input
+                <Input
                   type="number"
                   value={height}
                   onChange={(e) => setHeight(e.target.value)}
-                  className="border rounded px-3 py-1 w-28 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+                  size="lg"
+                  textAlign="center"
+                  fontWeight="bold"
+                  color="energy.sunrise"
                 />
               ) : (
-                <span>{height || "N/A"}</span>
+                <Heading size="lg" color="energy.sunrise">
+                  {height || "N/A"} {height && "cm"}
+                </Heading>
               )}
-            </div>
-            <div className="flex flex-col">
-              <strong>BMI:</strong>
-              <span
-                className="ml-0 sm:ml-2 px-2 py-1 text-sm font-semibold text-white rounded-full mt-1 sm:mt-0"
-                style={{
-                  backgroundColor:
-                    bmi < 18.5
-                      ? "#60A5FA"
-                      : bmi < 25
-                      ? "#16A34A"
-                      : bmi < 30
-                      ? "#FACC15"
-                      : "#DC2626",
+            </VStack>
+          </Box>
+
+          {/* BMI Card with Color-Coded Status */}
+          <Box
+            bg="white"
+            p={6}
+            borderRadius="xl"
+            boxShadow="md"
+            borderTop="4px solid"
+            borderTopColor={`${getBMIColor(bmi)}.400`}
+          >
+            <VStack spacing={3}>
+              <Text fontSize="4xl">💪</Text>
+              <Text fontSize="sm" color="gray.600" fontWeight="medium">BMI</Text>
+              <Heading size="lg" color={`${getBMIColor(bmi)}.600`}>
+                {bmi || "N/A"}
+              </Heading>
+              {bmi && (
+                <Badge
+                  colorScheme={getBMIColor(bmi)}
+                  fontSize="sm"
+                  px={3}
+                  borderRadius="full"
+                >
+                  {getBMICategory(bmi)}
+                </Badge>
+              )}
+            </VStack>
+          </Box>
+        </SimpleGrid>
+
+        {/* User Info Section */}
+        <Box
+          bg="white"
+          p={6}
+          borderRadius="xl"
+          boxShadow="md"
+          mb={6}
+        >
+          <Heading size="md" mb={4} color="brand.forest">
+            👤 Personal Information
+          </Heading>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+            <Box>
+              <Text fontSize="sm" color="gray.600">Full Name</Text>
+              <Text fontWeight="bold">
+                {user.first_name} {user.last_name}
+              </Text>
+            </Box>
+            <Box>
+              <Text fontSize="sm" color="gray.600">Username</Text>
+              <Text fontWeight="bold">{user.username}</Text>
+            </Box>
+            <Box>
+              <Text fontSize="sm" color="gray.600">Email</Text>
+              <Text fontWeight="bold">{user.email}</Text>
+            </Box>
+            <Box>
+              <Text fontSize="sm" color="gray.600">Age</Text>
+              <Text fontWeight="bold">{user.age || "N/A"} years</Text>
+            </Box>
+          </SimpleGrid>
+        </Box>
+
+        {/* Google Fit Integration */}
+        <Box
+          bg="white"
+          p={6}
+          borderRadius="xl"
+          boxShadow="md"
+          borderLeft="4px solid"
+          borderLeftColor="energy.sunrise"
+          mb={8}
+        >
+          <HStack justify="space-between" flexWrap="wrap">
+            <HStack spacing={4}>
+              <Text fontSize="3xl">📱</Text>
+              <VStack align="start" spacing={0}>
+                <Text fontWeight="bold" fontSize="lg">Google Fit Sync</Text>
+                <Text fontSize="sm" color="gray.600">
+                  Automatically sync your activities
+                </Text>
+              </VStack>
+            </HStack>
+            <GoogleFitConnect />
+          </HStack>
+        </Box>
+
+        {/* Action Buttons */}
+        <HStack spacing={4} justify="center" flexWrap="wrap">
+          {editing ? (
+            <>
+              <Button
+                size="lg"
+                bgGradient="linear(to-r, brand.forest, brand.pine)"
+                color="white"
+                fontWeight="bold"
+                borderRadius="full"
+                px={8}
+                _hover={{
+                  bgGradient="linear(to-r, brand.pine, brand.forest)",
                 }}
+                onClick={handleSave}
+                isLoading={loading}
+                leftIcon={<Text fontSize="xl">✅</Text>}
               >
-                {bmi ? getBMICategory(bmi) : "N/A"}
-              </span>
-            </div>
-          </div>
-
-          {message && <p className="text-sm text-red-600">{message}</p>}
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0 mt-2">
-            {editing ? (
-              <>
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
-                >
-                  {loading ? "Saving..." : "Save"}
-                </button>
-                <button
-                  onClick={() => setEditing(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg shadow hover:bg-gray-400 transition"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setEditing(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                Save Changes
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                borderColor="gray.400"
+                color="gray.700"
+                borderRadius="full"
+                px={8}
+                _hover={{ bg: "gray.100" }}
+                onClick={() => setEditing(false)}
+                leftIcon={<Text fontSize="xl">❌</Text>}
               >
-                Edit Weight & Height
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="lg"
+              bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+              color="white"
+              fontWeight="bold"
+              borderRadius="full"
+              px={8}
+              _hover={{
+                bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+                transform: "scale(1.05)"
+              }}
+              leftIcon={<Text fontSize="xl">✏️</Text>}
+              onClick={() => setEditing(true)}
+            >
+              Edit Profile
+            </Button>
+          )}
+        </HStack>
+      </Container>
+    </Box>
   );
 }

@@ -102,80 +102,111 @@ export default function Register() {
   };
 
   return (
-    <Box
-      maxW="md"
-      mx="auto"
-      mt={16}
-      p={8}
-      borderRadius="xl"
-      boxShadow="lg"
-      bg="white"
-      _dark={{ bg: "gray.700" }}
-    >
-      <Heading
+    <Box>
+      {/* Hero Section */}
+      <Box
+        bgGradient="linear(to-br, brand.forest, brand.pine)"
+        color="white"
+        py={16}
+        px={8}
         textAlign="center"
-        mb={6}
-        color="brand.600"
-        _dark={{ color: "brand.300" }}
+        mb={-8}
       >
-        Register
-      </Heading>
+        <Heading
+          size="2xl"
+          fontWeight="900"
+          bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+          bgClip="text"
+          mb={2}
+        >
+          Start Your Trek!
+        </Heading>
+        <Box fontSize="lg" opacity={0.9}>
+          🌲 Join the community of fitness enthusiasts
+        </Box>
+      </Box>
 
-      <form onSubmit={handleSubmit}>
+      {/* Register Form */}
+      <Box
+        maxW="md"
+        mx="auto"
+        mt={-4}
+        p={8}
+        borderRadius="2xl"
+        boxShadow="2xl"
+        bg="white"
+        border="3px solid"
+        borderColor="energy.sunrise"
+      >
+        <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           <FormControl isRequired>
-            <FormLabel>First Name</FormLabel>
-            <Input name="firstName" placeholder="Enter your first name" value={form.firstName} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">First Name</FormLabel>
+            <Input name="firstName" placeholder="Enter your first name" value={form.firstName} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Last Name</FormLabel>
-            <Input name="lastName" placeholder="Enter your last name" value={form.lastName} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">Last Name</FormLabel>
+            <Input name="lastName" placeholder="Enter your last name" value={form.lastName} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Username</FormLabel>
-            <Input name="username" placeholder="Enter your username" value={form.username} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">Username</FormLabel>
+            <Input name="username" placeholder="Enter your username" value={form.username} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Email</FormLabel>
-            <Input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">Email</FormLabel>
+            <Input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <Input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">Password</FormLabel>
+            <Input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Date of Birth</FormLabel>
-            <Input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">Date of Birth</FormLabel>
+            <Input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
           <FormControl>
-            <FormLabel>Gender</FormLabel>
-            <Select name="gender" value={form.gender} onChange={handleChange}>
+            <FormLabel fontWeight="bold" color="brand.forest">Gender</FormLabel>
+            <Select name="gender" value={form.gender} onChange={handleChange} size="lg" focusBorderColor="brand.forest">
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </Select>
           </FormControl>
 
           <FormControl>
-            <FormLabel>Weight (kg)</FormLabel>
-            <Input name="weight" type="number" placeholder="Enter your weight" value={form.weight} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">Weight (kg)</FormLabel>
+            <Input name="weight" type="number" placeholder="Enter your weight" value={form.weight} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
           <FormControl>
-            <FormLabel>Height (cm)</FormLabel>
-            <Input name="height" type="number" placeholder="Enter your height" value={form.height} onChange={handleChange} />
+            <FormLabel fontWeight="bold" color="brand.forest">Height (cm)</FormLabel>
+            <Input name="height" type="number" placeholder="Enter your height" value={form.height} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
           </FormControl>
 
-          <Button type="submit" colorScheme="green" w="full" isDisabled={loading}>
-            {loading ? <Spinner size="sm" /> : "Register"}
+          <Button
+            type="submit"
+            w="full"
+            size="lg"
+            bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+            color="white"
+            fontWeight="bold"
+            borderRadius="full"
+            _hover={{
+              bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+              transform: "scale(1.02)"
+            }}
+            isDisabled={loading}
+          >
+            {loading ? <Spinner size="sm" /> : "🚀 Register"}
           </Button>
         </VStack>
       </form>
     </Box>
+  </Box>
   );
 }

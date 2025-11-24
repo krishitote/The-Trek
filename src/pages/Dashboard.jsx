@@ -13,6 +13,9 @@ import {
   VStack,
   HStack,
   Collapse,
+  SimpleGrid,
+  Container,
+  Badge,
 } from "@chakra-ui/react";
 
 export default function Dashboard() {
@@ -96,62 +99,91 @@ export default function Dashboard() {
 
       {/* Collapsible Sections */}
       <Collapse in={showSubmitForm} animateOpacity>
-        <Box mb={4}>
+        <Box mb={6}>
           <ActivityForm onActivityAdded={fetchData} />
         </Box>
       </Collapse>
 
       <Collapse in={showChart} animateOpacity>
-        <Box mb={4}>
+        <Box mb={6} bg="white" p={6} borderRadius="2xl" boxShadow="md">
           <ProgressChart activities={activities} />
         </Box>
       </Collapse>
 
-      {/* User Ranking */}
-      {userRank && (
-        <Box mb={4} p={3} borderWidth="1px" borderRadius="md" bg="teal.50">
-          <Text fontWeight="bold">
-            Your Rank: #{userRank.rank} / {userRank.totalUsers}
-          </Text>
-          <Text>Total Distance: {Number(userRank.totalDistance || 0).toFixed(1)} km</Text>
-        </Box>
-      )}
-
       <Collapse in={showUserActivities} animateOpacity>
-        {loading ? (
-          <Spinner size="xl" color="teal.500" />
-        ) : activities.length === 0 ? (
-          <Text color="gray.500">You have no activities yet.</Text>
-        ) : (
-          <VStack spacing={2} align="stretch" mb={4}>
-            {activities
-              .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .map((a) => (
-                <Box
-                  key={a.id}
-                  p={2}
-                  borderWidth="1px"
-                  borderRadius="md"
-                  shadow="sm"
-                  bg="white"
-                >
-                  <HStack justify="space-between">
-                    <Text>
-                      <strong>{a.type}</strong> — {a.distance_km} km in {a.duration_min} min
-                    </Text>
-                    <Text fontSize="sm" color="gray.500">
-                      {new Date(a.date).toLocaleDateString()}{" "}
-                      {new Date(a.date).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </Text>
-                  </HStack>
-                </Box>
-              ))}
-          </VStack>
-        )}
+        <Box mb={6}>
+          <Heading size="md" mb={4} color="brand.forest">
+            📋 Your Activity Timeline
+          </Heading>
+          {activities.length === 0 ? (
+            <Box bg="white" p={8} borderRadius="2xl" boxShadow="md" textAlign="center">
+              <Text fontSize="3xl" mb={2}>🏃‍♂️</Text>
+              <Text color="gray.500">No activities yet. Start your trek!</Text>
+            </Box>
+          ) : (
+            <VStack spacing={4} align="stretch">
+              {activities
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .map((activity) => (
+                  <Box
+                    key={activity.id}
+                    bg="white"
+                    p={5}
+                    borderRadius="xl"
+                    boxShadow="md"
+                    borderLeft="4px solid"
+                    borderLeftColor={getActivityColor(activity.type)}
+                    transition="all 0.2s"
+                    _hover={{ boxShadow: "lg", transform: "translateX(4px)" }}
+                  >
+                    <HStack justify="space-between" flexWrap="wrap">
+                      <HStack spacing={4}>
+                        <Text fontSize="3xl">{getActivityIcon(activity.type)}</Text>
+                        <VStack align="start" spacing={0}>
+                          <Text fontWeight="bold" fontSize="lg">{activity.type}</Text>
+                          <Text fontSize="sm" color="gray.600">
+                            {new Date(activity.date).toLocaleDateString()} at{" "}
+                            {new Date(activity.date).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </Text>
+                        </VStack>
+                      </HStack>
+
+                      <HStack spacing={6}>
+                        <VStack spacing={0}>
+                          <Text fontSize="xs" color="gray.600">Distance</Text>
+                          <Badge
+                            colorScheme="green"
+                            fontSize="lg"
+                            px={3}
+                            borderRadius="full"
+                            fontWeight="bold"
+                          >
+                            {activity.distance_km} km
+                          </Badge>
+                        </VStack>
+                        <VStack spacing={0}>
+                          <Text fontSize="xs" color="gray.600">Duration</Text>
+                          <Badge
+                            colorScheme="orange"
+                            fontSize="lg"
+                            px={3}
+                            borderRadius="full"
+                            fontWeight="bold"
+                          >
+                            {activity.duration_min} min
+                          </Badge>
+                        </VStack>
+                      </HStack>
+                    </HStack>
+                  </Box>
+                ))}
+            </VStack>
+          )}
+        </Box>
       </Collapse>
-    </Box>
+    </Container>
   );
 }
