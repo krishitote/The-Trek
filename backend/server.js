@@ -15,6 +15,8 @@ import userRoutes from "./routes/users.js";
 import uploadRoutes from "./routes/upload.js";
 import googleFitRoutes from "./routes/googlefit.js";
 import leaderboardRoutes from "./routes/leaderboards.js";
+import { apiLimiter, uploadLimiter, activityLimiter } from "./middleware/rateLimiter.js";
+import { validateProfileUpdate } from "./middleware/validation.js";
 
 dotenv.config();
 
@@ -56,6 +58,10 @@ const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+// -------------------- Rate Limiting --------------------
+// Apply general API rate limiting to all API routes
+app.use('/api/', apiLimiter);
+
 // -------------------- Routes --------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/activities", activityRoutes);
@@ -63,8 +69,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/leaderboards", leaderboardRoutes);
 app.use("/api/googlefit", googleFitRoutes);
 
-// ✅ Photo upload routes
-app.use("/api/upload", uploadRoutes);
+// ✅ Photo upload routes (with upload-specific rate limiting)
+app.use("/api/upload", uploadLimiter, uploadRoutes);
 app.use("/uploads", express.static("uploads")); // serve uploaded files
 
 // --- Health Check Route ---

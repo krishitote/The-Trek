@@ -59,3 +59,37 @@ export const validateLogin = (req, res, next) => {
   }
   next();
 };
+
+// User profile update validation
+export const validateProfileUpdate = (req, res, next) => {
+  const schema = Joi.object({
+    first_name: Joi.string().max(100).allow('').optional(),
+    last_name: Joi.string().max(100).allow('').optional(),
+    weight: Joi.number().positive().max(500).allow(null).optional(),
+    height: Joi.number().positive().max(300).allow(null).optional(),
+    gender: Joi.string().valid('male', 'female', 'other').allow(null).optional(),
+    age: Joi.number().integer().min(13).max(120).allow(null).optional(),
+  }).min(1); // At least one field required
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ 
+      error: 'Invalid profile data', 
+      details: error.details[0].message 
+    });
+  }
+  next();
+};
+
+// Refresh token validation
+export const validateRefreshToken = (req, res, next) => {
+  const schema = Joi.object({
+    refreshToken: Joi.string().required(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: 'Refresh token is required' });
+  }
+  next();
+};

@@ -3,18 +3,15 @@ import express from "express";
 import pool from "../db.js";
 import { authenticateToken } from "../middleware/authMiddleware.js";
 import { validateActivity } from '../middleware/validation.js';
+import { activityLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
 // --- Submit new activity ---
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", activityLimiter, authenticateToken, validateActivity, async (req, res) => {
   try {
     const { type, distance_km, duration_min, date } = req.body;
     const userId = req.user.id; // ✅ from token
-
-    if (!type || !distance_km || !duration_min) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
 
     const result = await pool.query(
       `INSERT INTO activities (user_id, type, distance_km, duration_min, date)
@@ -26,7 +23,7 @@ router.post("/", authenticateToken, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Activity creation failed:", err.message);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
