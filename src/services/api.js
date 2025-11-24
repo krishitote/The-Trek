@@ -43,7 +43,7 @@ export async function apiSubmitActivity(token, body) {
 
 // ---------- Auth ----------
 export async function apiLogin({ username, password }) {
-  const res = await fetch(`${API_URL}/api/login`, {
+  const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -62,7 +62,7 @@ export async function apiRegister({
   weight,
   height,
 }) {
-  const res = await fetch(`${API_URL}/api/register`, {
+  const res = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -76,6 +76,24 @@ export async function apiRegister({
       weight,
       height,
     }),
+  });
+  return handleResponse(res);
+}
+
+export async function apiRefreshToken(refreshToken) {
+  const res = await fetch(`${API_URL}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+  });
+  return handleResponse(res);
+}
+
+export async function apiLogout(refreshToken) {
+  const res = await fetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
   });
   return handleResponse(res);
 }

@@ -31,7 +31,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [userActs, users] = await Promise.all([
-        apiActivities(session.token, user.id),
+        apiActivities(session.accessToken, user.id),
         apiUsers(),
       ]);
       setActivities(userActs);
@@ -40,7 +40,7 @@ export default function Dashboard() {
       // Compute ranking
       const leaderboard = await Promise.all(
         users.map(async (u) => {
-          const acts = await apiActivities(session.token, u.id);
+          const acts = await apiActivities(session.accessToken, u.id);
           const totalDistance = acts.reduce((sum, a) => sum + Number(a.distance_km || 0), 0);
           return { ...u, totalDistance };
         })

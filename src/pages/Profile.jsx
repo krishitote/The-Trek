@@ -48,7 +48,7 @@ export default function Profile() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.token}`,
+            Authorization: `Bearer ${session.accessToken}`,
           },
           body: JSON.stringify({ weight: Number(weight), height: Number(height) }),
         }
@@ -75,7 +75,7 @@ export default function Profile() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${session.token}` },
+        headers: { Authorization: `Bearer ${session.accessToken}` },
         body: formData,
       });
       const data = await res.json();

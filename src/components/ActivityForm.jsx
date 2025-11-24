@@ -61,7 +61,7 @@ export default function ActivityForm({ onActivityAdded }) {
     setLoading(true);
 
     try {
-      await apiSubmitActivity(session.token, {
+      await apiSubmitActivity(session.accessToken, {
         type: finalType,
         distance_km: distance,
         duration_min: duration,
