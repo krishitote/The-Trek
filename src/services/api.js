@@ -1,5 +1,5 @@
 // src/services/api.js
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ---------- Helper ----------
 async function handleResponse(res) {
@@ -43,7 +43,7 @@ export async function apiSubmitActivity(token, body) {
 
 // ---------- Auth ----------
 export async function apiLogin({ username, password }) {
-  const res = await fetch(`${API_URL}/auth/login`, {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -62,7 +62,7 @@ export async function apiRegister({
   weight,
   height,
 }) {
-  const res = await fetch(`${API_URL}/auth/register`, {
+  const res = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -81,7 +81,7 @@ export async function apiRegister({
 }
 
 export async function apiRefreshToken(refreshToken) {
-  const res = await fetch(`${API_URL}/auth/refresh`, {
+  const res = await fetch(`${API_URL}/api/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
@@ -90,7 +90,7 @@ export async function apiRefreshToken(refreshToken) {
 }
 
 export async function apiLogout(refreshToken) {
-  const res = await fetch(`${API_URL}/auth/logout`, {
+  const res = await fetch(`${API_URL}/api/auth/logout`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
