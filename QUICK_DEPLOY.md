@@ -1,5 +1,15 @@
 # 🚀 QUICK DEPLOY - TrueHost Upload Steps
 
+## ⚡ **IMPORTANT: Login Fixed! (New Build Required)**
+
+**Issue Fixed:** Login was failing with "Cannot POST /auth/login" error due to incorrect API URL paths.
+
+**Solution:** Removed duplicate `/api` prefix from base URL. **You MUST upload the NEW build** from `dist/` folder.
+
+**New Build:** `index-BFy5Zs0y.js` (replaces old `index-B_9g0JFq.js`)
+
+---
+
 ## ⚡ Fast Track (5 Minutes)
 
 ### Files Ready to Upload:
@@ -7,7 +17,7 @@
 c:\Users\krish\the-trek\dist\
 ├── index.html          ← Upload to site root
 └── assets\
-    └── index-B_9g0JFq.js   ← Upload entire assets folder
+    └── index-BFy5Zs0y.js   ← Upload entire assets folder (NEW BUILD - API fix)
 ```
 
 ### 3-Step Process:
@@ -28,7 +38,7 @@ c:\Users\krish\the-trek\dist\
   ├── .htaccess
   ├── index.html  ← NEW
   └── assets/     ← NEW
-      └── index-B_9g0JFq.js
+      └── index-BFy5Zs0y.js (API fix build)
   ```
 
 #### 3️⃣ Create .htaccess (if missing)
