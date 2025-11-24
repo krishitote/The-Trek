@@ -1,58 +1,69 @@
-# 🚀 QUICK DEPLOY - TrueHost Upload Steps
+# 🚀 QUICK DEPLOY - Netlify Deployment
 
 ## ⚡ **IMPORTANT: Login Fixed! (New Build Required)**
 
 **Issue Fixed:** Login was failing with "Cannot POST /auth/login" error due to incorrect API URL paths.
 
-**Solution:** Removed duplicate `/api` prefix from base URL. **You MUST upload the NEW build** from `dist/` folder.
+**Solution:** Removed duplicate `/api` prefix from base URL. **New build ready to deploy!**
 
-**New Build:** `index-BFy5Zs0y.js` (replaces old `index-B_9g0JFq.js`)
+**New Build:** `index-BFy5Zs0y.js` (includes API fix + nature theme)
+
+**Hosting:** Site is on **Netlify** (domain registered with TrueHost, hosting on Netlify)
 
 ---
 
-## ⚡ Fast Track (5 Minutes)
+## ⚡ Fast Track - Automated Deploy (30 Seconds)
+
+## ⚡ Fast Track - Automated Deploy (30 Seconds)
+
+**Just run this PowerShell script:**
+```powershell
+.\deploy-netlify.ps1
+```
+
+This will:
+1. Build your production bundle (`npm run build`)
+2. Install Netlify CLI if needed
+3. Deploy to Netlify automatically
+4. Show success message when live!
+
+**First time?** The script will ask you to login to Netlify (opens browser, click authorize)
+
+---
+
+## 📋 Manual Deploy via Netlify Dashboard (2 Minutes)
 
 ### Files Ready to Upload:
 ```
 c:\Users\krish\the-trek\dist\
-├── index.html          ← Upload to site root
+├── index.html          
 └── assets\
-    └── index-BFy5Zs0y.js   ← Upload entire assets folder (NEW BUILD - API fix)
+    └── index-BFy5Zs0y.js   ← NEW (API fix build)
 ```
 
-### 3-Step Process:
+### Step-by-Step:
 
-#### 1️⃣ Login to TrueHost
-- Go to: https://truehost.com/clientarea
-- Open **File Manager** or **cPanel**
+1. **Login to Netlify:** https://app.netlify.com
+2. **Find your site** (should show `trekfit.co.ke`)
+3. **Click on your site** 
+4. **Go to "Deploys" tab**
+5. **Drag the entire `dist/` folder** into the deploy drop zone
+6. **Wait 30 seconds** - Netlify will build and deploy automatically!
 
-#### 2️⃣ Upload Files
-- Navigate to `public_html` (or `www`)
-- **DELETE** old files (keep `.htaccess` if exists)
-- **UPLOAD** everything from `dist/` folder:
-  - Drag `index.html` to root
-  - Drag `assets/` folder to root
-- Result should look like:
-  ```
-  public_html/
-  ├── .htaccess
-  ├── index.html  ← NEW
-  └── assets/     ← NEW
-      └── index-BFy5Zs0y.js (API fix build)
-  ```
+---
 
-#### 3️⃣ Create .htaccess (if missing)
-Create new file named `.htaccess` in `public_html`:
-```apache
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
-```
+## 🔧 First-Time Setup (Only if not connected yet)
+
+If your site isn't on Netlify yet, connect it:
+
+1. Login to Netlify
+2. Click **"Add new site"** → **"Import an existing project"**
+3. Connect to **GitHub** → Select `krishitote/The-Trek`
+4. Build settings:
+   - **Build command:** `npm run build`
+   - **Publish directory:** `dist`
+5. Click **"Deploy site"**
+6. Once deployed, go to **Domain settings** and add `trekfit.co.ke`
 
 ---
 
