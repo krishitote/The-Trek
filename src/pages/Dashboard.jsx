@@ -18,6 +18,21 @@ import {
   Badge,
 } from "@chakra-ui/react";
 
+// Helper functions for activity styling
+const getActivityIcon = (type) => {
+  if (type === "Running") return "🏃";
+  if (type === "Cycling") return "🚴";
+  if (type === "Swimming") return "🏊";
+  return "🏃";
+};
+
+const getActivityColor = (type) => {
+  if (type === "Running") return "brand.500";
+  if (type === "Cycling") return "energy.500";
+  if (type === "Swimming") return "sky.500";
+  return "brand.500";
+};
+
 export default function Dashboard() {
   const { user, session } = useAuth();
   const [activities, setActivities] = useState([]);
@@ -67,45 +82,133 @@ export default function Dashboard() {
     if (user && session?.token) fetchData();
   }, [user, session?.token]);
 
+  if (loading) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <VStack spacing={4}>
+          <Spinner size="xl" color="brand.500" thickness="4px" />
+          <Text color="gray.600">Loading your trek data...</Text>
+        </VStack>
+      </Container>
+    );
+  }
+
   return (
-    <Box maxW="4xl" mx="auto" p={4}>
-      <Heading size="lg" mb={4} color="teal.600">
+    <Container maxW="container.xl" py={8}>
+      <Heading size="xl" mb={8} color="brand.500" fontWeight="black">
         🏃 My Dashboard
       </Heading>
 
-      {/* Buttons Row */}
-      <HStack spacing={3} mb={4}>
+      {/* Stats Cards Row */}
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
+        {/* Total Distance Card */}
+        <Box
+          bgGradient="linear(to-br, brand.400, brand.600)"
+          color="white"
+          p={6}
+          borderRadius="2xl"
+          boxShadow="lg"
+        >
+          <HStack justify="space-between" mb={2}>
+            <Text fontSize="sm" opacity={0.9}>Total Distance</Text>
+            <Text fontSize="3xl">🏃</Text>
+          </HStack>
+          <Heading size="2xl" fontWeight="black">{userRank?.totalDistance || 0}</Heading>
+          <Text fontSize="sm" opacity={0.8}>kilometers trekked</Text>
+        </Box>
+
+        {/* Global Rank Card */}
+        <Box
+          bgGradient="linear(to-br, energy.400, energy.600)"
+          color="white"
+          p={6}
+          borderRadius="2xl"
+          boxShadow="lg"
+        >
+          <HStack justify="space-between" mb={2}>
+            <Text fontSize="sm" opacity={0.9}>Global Rank</Text>
+            <Text fontSize="3xl">🏆</Text>
+          </HStack>
+          <Heading size="2xl" fontWeight="black">#{userRank?.rank || "-"}</Heading>
+          <Text fontSize="sm" opacity={0.8}>out of {userRank?.totalUsers || 0} trekkers</Text>
+        </Box>
+
+        {/* Activities Count Card */}
+        <Box
+          bgGradient="linear(to-br, sky.400, sky.600)"
+          color="white"
+          p={6}
+          borderRadius="2xl"
+          boxShadow="lg"
+        >
+          <HStack justify="space-between" mb={2}>
+            <Text fontSize="sm" opacity={0.9}>Total Activities</Text>
+            <Text fontSize="3xl">📊</Text>
+          </HStack>
+          <Heading size="2xl" fontWeight="black">{activities.length}</Heading>
+          <Text fontSize="sm" opacity={0.8}>logged this month</Text>
+        </Box>
+      </SimpleGrid>
+
+      {/* Energy-Themed Action Buttons */}
+      <HStack spacing={4} mb={6} flexWrap="wrap">
         <Button
-          colorScheme="green"
+          size="lg"
+          bgGradient="linear(to-r, energy.400, energy.600)"
+          color="white"
+          fontWeight="bold"
+          borderRadius="full"
+          px={8}
+          _hover={{
+            bgGradient: "linear(to-r, energy.600, energy.400)",
+            transform: "scale(1.05)"
+          }}
+          leftIcon={<Text fontSize="xl">⚡</Text>}
           onClick={() => setShowSubmitForm(!showSubmitForm)}
         >
-          {showSubmitForm ? "Hide Submit Activity" : "Submit Activity"}
+          {showSubmitForm ? "Hide" : "Log Activity"}
         </Button>
 
         <Button
-          colorScheme="purple"
-          onClick={() => setShowUserActivities(!showUserActivities)}
-        >
-          {showUserActivities ? "Hide My Activities" : "My Activities"}
-        </Button>
-
-        <Button
-          colorScheme="blue"
+          size="lg"
+          variant="outline"
+          borderColor="brand.500"
+          color="brand.500"
+          borderRadius="full"
+          px={8}
+          _hover={{ bg: "brand.500", color: "white" }}
+          leftIcon={<Text fontSize="xl">📈</Text>}
           onClick={() => setShowChart(!showChart)}
         >
-          {showChart ? "Hide My Progress Chart" : "My Progress Chart"}
+          Progress Chart
+        </Button>
+
+        <Button
+          size="lg"
+          variant="outline"
+          borderColor="sky.500"
+          color="sky.500"
+          borderRadius="full"
+          px={8}
+          _hover={{ bg: "sky.500", color: "white" }}
+          leftIcon={<Text fontSize="xl">📋</Text>}
+          onClick={() => setShowUserActivities(!showUserActivities)}
+        >
+          {showUserActivities ? "Hide" : "View"} Activities
         </Button>
       </HStack>
 
       {/* Collapsible Sections */}
       <Collapse in={showSubmitForm} animateOpacity>
-        <Box mb={6}>
+        <Box mb={6} bg="white" p={6} borderRadius="2xl" boxShadow="lg">
+          <Heading size="md" mb={4} color="brand.500">⚡ Log New Activity</Heading>
           <ActivityForm onActivityAdded={fetchData} />
         </Box>
       </Collapse>
 
       <Collapse in={showChart} animateOpacity>
-        <Box mb={6} bg="white" p={6} borderRadius="2xl" boxShadow="md">
+        <Box mb={6} bg="white" p={6} borderRadius="2xl" boxShadow="lg">
+          <Heading size="md" mb={4} color="brand.500">📈 Your Progress Over Time</Heading>
           <ProgressChart activities={activities} />
         </Box>
       </Collapse>
@@ -154,27 +257,15 @@ export default function Dashboard() {
                       <HStack spacing={6}>
                         <VStack spacing={0}>
                           <Text fontSize="xs" color="gray.600">Distance</Text>
-                          <Badge
-                            colorScheme="green"
-                            fontSize="lg"
-                            px={3}
-                            borderRadius="full"
-                            fontWeight="bold"
-                          >
+                          <Text fontWeight="bold" fontSize="xl" color="brand.500">
                             {activity.distance_km} km
-                          </Badge>
+                          </Text>
                         </VStack>
                         <VStack spacing={0}>
                           <Text fontSize="xs" color="gray.600">Duration</Text>
-                          <Badge
-                            colorScheme="orange"
-                            fontSize="lg"
-                            px={3}
-                            borderRadius="full"
-                            fontWeight="bold"
-                          >
+                          <Text fontWeight="bold" fontSize="xl" color="energy.500">
                             {activity.duration_min} min
-                          </Badge>
+                          </Text>
                         </VStack>
                       </HStack>
                     </HStack>
