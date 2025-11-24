@@ -63,7 +63,7 @@ return (
 <Box>
   {/* Hero Section */}
   <Box
-    bgGradient="linear(to-br, brand.forest, brand.pine)"
+    bgGradient="linear(to-br, brand.500, brand.600)"
     color="white"
     py={16}
     px={8}
@@ -73,7 +73,7 @@ return (
     <Heading
       size="2xl"
       fontWeight="900"
-      bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+      bgGradient="linear(to-r, energy.500, energy.600)"
       bgClip="text"
       mb={2}
     >
@@ -94,24 +94,24 @@ return (
     boxShadow="2xl"
     bg="white"
     border="3px solid"
-    borderColor="energy.sunrise"
+    borderColor="energy.500"
   >
     <form onSubmit={handleSubmit}>
       <VStack spacing={5}>
         <FormControl isRequired>
-          <FormLabel fontWeight="bold" color="brand.forest">Username</FormLabel>
+          <FormLabel fontWeight="bold" color="brand.500">Username</FormLabel>
           <Input
             name="username"
             placeholder="Enter your username"
             value={form.username}
             onChange={handleChange}
             size="lg"
-            focusBorderColor="brand.forest"
+            focusBorderColor="brand.500"
           />
         </FormControl>
 
         <FormControl isRequired>
-          <FormLabel fontWeight="bold" color="brand.forest">Password</FormLabel>
+          <FormLabel fontWeight="bold" color="brand.500">Password</FormLabel>
           <Input
             name="password"
             type="password"
@@ -119,7 +119,7 @@ return (
             value={form.password}
             onChange={handleChange}
             size="lg"
-            focusBorderColor="brand.forest"
+            focusBorderColor="brand.500"
           />
         </FormControl>
 
@@ -127,12 +127,12 @@ return (
           type="submit"
           w="full"
           size="lg"
-          bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+          bgGradient="linear(to-r, energy.500, energy.600)"
           color="white"
           fontWeight="bold"
           borderRadius="full"
           _hover={{
-            bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+            bgGradient: "linear(to-r, energy.600, energy.500)",
             transform: "scale(1.02)"
           }}
           isDisabled={loading}

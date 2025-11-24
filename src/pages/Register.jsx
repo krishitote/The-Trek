@@ -105,7 +105,7 @@ export default function Register() {
     <Box>
       {/* Hero Section */}
       <Box
-        bgGradient="linear(to-br, brand.forest, brand.pine)"
+        bgGradient="linear(to-br, brand.500, brand.600)"
         color="white"
         py={16}
         px={8}
@@ -115,7 +115,7 @@ export default function Register() {
         <Heading
           size="2xl"
           fontWeight="900"
-          bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+          bgGradient="linear(to-r, energy.500, energy.600)"
           bgClip="text"
           mb={2}
         >
@@ -136,68 +136,68 @@ export default function Register() {
         boxShadow="2xl"
         bg="white"
         border="3px solid"
-        borderColor="energy.sunrise"
+        borderColor="energy.500"
       >
         <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.forest">First Name</FormLabel>
-            <Input name="firstName" placeholder="Enter your first name" value={form.firstName} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">First Name</FormLabel>
+            <Input name="firstName" placeholder="Enter your first name" value={form.firstName} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.forest">Last Name</FormLabel>
-            <Input name="lastName" placeholder="Enter your last name" value={form.lastName} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">Last Name</FormLabel>
+            <Input name="lastName" placeholder="Enter your last name" value={form.lastName} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.forest">Username</FormLabel>
-            <Input name="username" placeholder="Enter your username" value={form.username} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">Username</FormLabel>
+            <Input name="username" placeholder="Enter your username" value={form.username} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.forest">Email</FormLabel>
-            <Input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">Email</FormLabel>
+            <Input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.forest">Password</FormLabel>
-            <Input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">Password</FormLabel>
+            <Input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.forest">Date of Birth</FormLabel>
-            <Input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">Date of Birth</FormLabel>
+            <Input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <FormControl>
-            <FormLabel fontWeight="bold" color="brand.forest">Gender</FormLabel>
-            <Select name="gender" value={form.gender} onChange={handleChange} size="lg" focusBorderColor="brand.forest">
+            <FormLabel fontWeight="bold" color="brand.500">Gender</FormLabel>
+            <Select name="gender" value={form.gender} onChange={handleChange} size="lg" focusBorderColor="brand.500">
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </Select>
           </FormControl>
 
           <FormControl>
-            <FormLabel fontWeight="bold" color="brand.forest">Weight (kg)</FormLabel>
-            <Input name="weight" type="number" placeholder="Enter your weight" value={form.weight} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">Weight (kg)</FormLabel>
+            <Input name="weight" type="number" placeholder="Enter your weight" value={form.weight} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <FormControl>
-            <FormLabel fontWeight="bold" color="brand.forest">Height (cm)</FormLabel>
-            <Input name="height" type="number" placeholder="Enter your height" value={form.height} onChange={handleChange} size="lg" focusBorderColor="brand.forest" />
+            <FormLabel fontWeight="bold" color="brand.500">Height (cm)</FormLabel>
+            <Input name="height" type="number" placeholder="Enter your height" value={form.height} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
           </FormControl>
 
           <Button
             type="submit"
             w="full"
             size="lg"
-            bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+            bgGradient="linear(to-r, energy.500, energy.600)"
             color="white"
             fontWeight="bold"
             borderRadius="full"
             _hover={{
-              bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+              bgGradient: "linear(to-r, energy.600, energy.500)",
               transform: "scale(1.02)"
             }}
             isDisabled={loading}

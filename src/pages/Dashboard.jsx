@@ -112,7 +112,7 @@ export default function Dashboard() {
 
       <Collapse in={showUserActivities} animateOpacity>
         <Box mb={6}>
-          <Heading size="md" mb={4} color="brand.forest">
+          <Heading size="md" mb={4} color="brand.500">
             📋 Your Activity Timeline
           </Heading>
           {activities.length === 0 ? (

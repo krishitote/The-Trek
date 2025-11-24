@@ -161,7 +161,7 @@ export default function Profile() {
     <Box>
       {/* Profile Header with Gradient Background */}
       <Box
-        bgGradient="linear(to-br, brand.forest, brand.pine)"
+        bgGradient="linear(to-br, brand.500, brand.600)"
         color="white"
         py={12}
         px={8}
@@ -175,7 +175,7 @@ export default function Profile() {
                 name={user.username}
                 src={preview || (user.profile_image ? `${import.meta.env.VITE_API_URL}${user.profile_image}` : undefined)}
                 border="6px solid"
-                borderColor="energy.sunrise"
+                borderColor="energy.500"
                 boxShadow="xl"
               />
               <Badge
@@ -222,10 +222,10 @@ export default function Profile() {
               {selectedFile && (
                 <Button
                   size="sm"
-                  bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+                  bgGradient="linear(to-r, energy.500, energy.600)"
                   color="white"
                   _hover={{
-                    bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+                    bgGradient: "linear(to-r, energy.600, energy.500)",
                   }}
                   onClick={handlePhotoUpload}
                 >
@@ -239,7 +239,7 @@ export default function Profile() {
 
       <Container maxW="container.xl" pb={12}>
         {/* Stats Cards with Health Metrics */}
-        <Heading size="lg" mb={6} color="brand.forest">
+        <Heading size="lg" mb={6} color="brand.500">
           📊 Health Stats
         </Heading>
         
@@ -251,7 +251,7 @@ export default function Profile() {
             borderRadius="xl"
             boxShadow="md"
             borderTop="4px solid"
-            borderTopColor="brand.forest"
+            borderTopColor="brand.500"
           >
             <VStack spacing={3}>
               <Text fontSize="4xl">⚖️</Text>
@@ -264,10 +264,10 @@ export default function Profile() {
                   size="lg"
                   textAlign="center"
                   fontWeight="bold"
-                  color="brand.forest"
+                  color="brand.500"
                 />
               ) : (
-                <Heading size="lg" color="brand.forest">
+                <Heading size="lg" color="brand.500">
                   {weight || "N/A"} {weight && "kg"}
                 </Heading>
               )}
@@ -281,7 +281,7 @@ export default function Profile() {
             borderRadius="xl"
             boxShadow="md"
             borderTop="4px solid"
-            borderTopColor="energy.sunrise"
+            borderTopColor="energy.500"
           >
             <VStack spacing={3}>
               <Text fontSize="4xl">📏</Text>
@@ -294,10 +294,10 @@ export default function Profile() {
                   size="lg"
                   textAlign="center"
                   fontWeight="bold"
-                  color="energy.sunrise"
+                  color="energy.500"
                 />
               ) : (
-                <Heading size="lg" color="energy.sunrise">
+                <Heading size="lg" color="energy.500">
                   {height || "N/A"} {height && "cm"}
                 </Heading>
               )}
@@ -341,7 +341,7 @@ export default function Profile() {
           boxShadow="md"
           mb={6}
         >
-          <Heading size="md" mb={4} color="brand.forest">
+          <Heading size="md" mb={4} color="brand.500">
             👤 Personal Information
           </Heading>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
@@ -373,7 +373,7 @@ export default function Profile() {
           borderRadius="xl"
           boxShadow="md"
           borderLeft="4px solid"
-          borderLeftColor="energy.sunrise"
+          borderLeftColor="energy.500"
           mb={8}
         >
           <HStack justify="space-between" flexWrap="wrap">
@@ -396,13 +396,13 @@ export default function Profile() {
             <>
               <Button
                 size="lg"
-                bgGradient="linear(to-r, brand.forest, brand.pine)"
+                bgGradient="linear(to-r, brand.500, brand.600)"
                 color="white"
                 fontWeight="bold"
                 borderRadius="full"
                 px={8}
                 _hover={{
-                  bgGradient="linear(to-r, brand.pine, brand.forest)",
+                  bgGradient: "linear(to-r, brand.600, brand.500)",
                 }}
                 onClick={handleSave}
                 isLoading={loading}
@@ -427,13 +427,13 @@ export default function Profile() {
           ) : (
             <Button
               size="lg"
-              bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+              bgGradient="linear(to-r, energy.500, energy.600)"
               color="white"
               fontWeight="bold"
               borderRadius="full"
               px={8}
               _hover={{
-                bgGradient: "linear(to-r, energy.amber, energy.sunrise)",
+                bgGradient: "linear(to-r, energy.600, energy.500)",
                 transform: "scale(1.05)"
               }}
               leftIcon={<Text fontSize="xl">✏️</Text>}

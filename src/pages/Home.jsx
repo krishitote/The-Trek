@@ -62,7 +62,7 @@ export default function Home() {
   if (loading) {
     return (
       <Box textAlign="center" mt={8}>
-        <Spinner size="xl" color="brand.forest" thickness="4px" />
+        <Spinner size="xl" color="brand.500" thickness="4px" />
         <Text mt={4} color="gray.600">Loading leaderboards...</Text>
       </Box>
     );
@@ -91,20 +91,20 @@ export default function Home() {
   // Get activity color
   const getActivityColor = (type) => {
     const colors = {
-      Running: "brand.forest",
-      Cycling: "energy.sunrise",
-      Swimming: "sky.azure",
-      Walking: "brand.pine",
-      Hiking: "earth.stone"
+      Running: "brand.500",
+      Cycling: "energy.500",
+      Swimming: "sky.500",
+      Walking: "brand.600",
+      Hiking: "earth.500"
     };
-    return colors[type] || "brand.forest";
+    return colors[type] || "brand.500";
   };
 
   return (
     <Box>
       {/* Hero Section */}
       <Box
-        bgGradient="linear(to-br, brand.forest, brand.pine)"
+        bgGradient="linear(to-br, brand.500, brand.600)"
         color="white"
         py={{ base: 12, md: 20 }}
         px={8}
@@ -116,7 +116,7 @@ export default function Home() {
           <Heading
             size="2xl"
             fontWeight="900"
-            bgGradient="linear(to-r, energy.sunrise, energy.amber)"
+            bgGradient="linear(to-r, energy.500, energy.600)"
             bgClip="text"
             mb={4}
           >
@@ -130,7 +130,7 @@ export default function Home() {
 
       <Container maxW="container.xl" py={12}>
         {/* Top 3 Podium */}
-        <Heading size="lg" textAlign="center" mb={8} color="brand.forest">
+        <Heading size="lg" textAlign="center" mb={8} color="brand.500">
           🏆 Top 3 Champions
         </Heading>
         
@@ -166,7 +166,7 @@ export default function Home() {
           {allTime[0] && (
             <VStack spacing={3}>
               <Box
-                bgGradient="linear(to-br, energy.sunrise, energy.amber)"
+                bgGradient="linear(to-br, energy.500, energy.600)"
                 w="100px"
                 h="140px"
                 borderRadius="xl"
@@ -182,7 +182,7 @@ export default function Home() {
                 name={allTime[0].username}
                 src={allTime[0].profile_image ? `${import.meta.env.VITE_API_URL}${allTime[0].profile_image}` : undefined}
                 border="4px solid"
-                borderColor="energy.sunrise"
+                borderColor="energy.500"
               />
               <Text fontWeight="black" fontSize="xl">{allTime[0].username}</Text>
               <Badge colorScheme="orange" fontSize="lg" px={4} borderRadius="full">
@@ -220,7 +220,7 @@ export default function Home() {
         </HStack>
 
         {/* Activity Type Leaders */}
-        <Heading size="lg" textAlign="center" mb={8} color="brand.forest">
+        <Heading size="lg" textAlign="center" mb={8} color="brand.500">
           🏃 Leaders by Activity
         </Heading>
 
@@ -269,7 +269,7 @@ export default function Home() {
         </SimpleGrid>
 
         {/* Gender Leaders */}
-        <Heading size="lg" textAlign="center" mb={8} color="brand.forest">
+        <Heading size="lg" textAlign="center" mb={8} color="brand.500">
           🚹🚺 Leaders by Gender
         </Heading>
 
@@ -284,9 +284,9 @@ export default function Home() {
                 borderRadius="2xl"
                 boxShadow="md"
                 border="2px solid"
-                borderColor="sky.azure"
+                borderColor="sky.500"
               >
-                <Heading size="md" mb={4} color="sky.azure">
+                <Heading size="md" mb={4} color="sky.500">
                   {gender === "Male" ? "🚹 Male" : "🚺 Female"} Leaders
                 </Heading>
                 <VStack align="stretch" spacing={2}>
@@ -304,7 +304,7 @@ export default function Home() {
                           {user.username}
                         </Text>
                       </HStack>
-                      <Text fontWeight="bold" color="sky.azure" fontSize="sm">
+                      <Text fontWeight="bold" color="sky.500" fontSize="sm">
                         {Number(user.total_distance || 0).toFixed(1)} km
                       </Text>
                     </HStack>
