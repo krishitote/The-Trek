@@ -5,8 +5,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import fs from "fs"; // ✅ added
-import path from "path"; // ✅ may be useful for uploads
+import fs from "fs";
+import path from "path";
 import { Pool } from "pg";
 
 import authRoutes from "./routes/auth.js";
@@ -17,8 +17,13 @@ import googleFitRoutes from "./routes/googlefit.js";
 import leaderboardRoutes from "./routes/leaderboards.js";
 import { apiLimiter, uploadLimiter, activityLimiter } from "./middleware/rateLimiter.js";
 import { validateProfileUpdate } from "./middleware/validation.js";
+import { connectRedis } from "./config/redis.js";
+import logger, { addRequestId, requestLogger } from "./config/logger.js";
 
 dotenv.config();
+
+// Initialize Redis (optional - app works without it)
+await connectRedis();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -52,6 +57,10 @@ app.use(
 );
 
 app.use(express.json());
+
+// -------------------- Logging & Request Tracking --------------------
+app.use(addRequestId);      // Add unique request IDs
+app.use(requestLogger);     // Log all HTTP requests
 
 // PostgreSQL pool setup
 const pool = new pg.Pool({
@@ -311,5 +320,8 @@ app.put("/api/users/:id", authMiddleware, async (req, res) => {
 
 // -------------------- Start Server --------------------
 app.listen(port, () => {
-  console.log(`🚀 Server running on http://localhost:${port}`);
+  logger.info(`🚀 Server started on port ${port}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
+  logger.info(`Redis: ${process.env.REDIS_URL ? 'Enabled (with caching)' : 'Disabled (no caching)'}`);
 });

@@ -4,6 +4,7 @@ import pool from "../db.js";
 import { authenticateToken } from "../middleware/authMiddleware.js";
 import { validateActivity } from '../middleware/validation.js';
 import { activityLimiter } from '../middleware/rateLimiter.js';
+import { invalidateCache } from '../middleware/cache.js';
 
 const router = express.Router();
 
@@ -20,6 +21,9 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
       [userId, type, distance_km, duration_min, date || new Date()]
     );
 
+    // Invalidate leaderboard cache when new activity added
+    await invalidateCache('cache:GET:/api/leaderboards*');
+    
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Activity creation failed:", err.message);

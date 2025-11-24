@@ -1,10 +1,11 @@
 import express from 'express';
 import pool from '../db.js';
+import { cacheMiddleware } from '../middleware/cache.js';
 
 const router = express.Router();
 
-// FAST endpoint for dashboard ranking
-router.get('/quick', async (req, res) => {
+// FAST endpoint for dashboard ranking (cached for 5 minutes)
+router.get('/quick', cacheMiddleware({ ttl: 300 }), async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -29,8 +30,8 @@ router.get('/quick', async (req, res) => {
   }
 });
 
-// Full leaderboard with all breakdowns
-router.get('/', async (req, res) => {
+// Full leaderboard with all breakdowns (cached for 10 minutes)
+router.get('/', cacheMiddleware({ ttl: 600 }), async (req, res) => {
   try {
     const [allTime, perActivity, perGender] = await Promise.all([
       pool.query(`

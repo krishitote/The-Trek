@@ -1,0 +1,8 @@
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-11-24T16:47:02.235Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-11-24T16:47:02.238Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-11-24T16:47:02.239Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-11-24T16:47:02.240Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-11-24T16:48:34.384Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-11-24T16:48:34.388Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-11-24T16:48:34.389Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-11-24T16:48:34.390Z"}
