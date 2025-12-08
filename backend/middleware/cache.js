@@ -9,24 +9,24 @@ export function cacheMiddleware(options = {}) {
   } = options;
   
   return async (req, res, next) => {
-    const redis = getRedisClient();
-    
-    // Skip if Redis not available
-    if (!redis) {
-      return next();
-    }
-    
-    // Check condition (e.g., only cache GET requests)
-    if (condition && !condition(req)) {
-      return next();
-    }
-    
-    // Generate cache key
-    const key = keyGenerator 
-      ? keyGenerator(req) 
-      : `cache:${req.method}:${req.originalUrl}`;
-    
     try {
+      const redis = getRedisClient();
+      
+      // Skip if Redis not available or not connected
+      if (!redis || !redis.isReady) {
+        return next();
+      }
+      
+      // Check condition (e.g., only cache GET requests)
+      if (condition && !condition(req)) {
+        return next();
+      }
+      
+      // Generate cache key
+      const key = keyGenerator 
+        ? keyGenerator(req) 
+        : `cache:${req.method}:${req.originalUrl}`;
+      
       // Try to get from cache
       const cached = await redis.get(key);
       
@@ -42,12 +42,22 @@ export function cacheMiddleware(options = {}) {
       
       // Override res.json to cache response
       res.json = function(data) {
-        // Cache the response
+        // Cache the response (don't await - fire and forget)
         redis.setEx(key, ttl, JSON.stringify(data))
           .catch(err => console.error('Redis setEx failed:', err.message));
         
         // Send response
         return originalJson(data);
+      };
+      
+      next();
+    } catch (err) {
+      // If cache fails, just continue without caching
+      console.error('Cache middleware error:', err.message);
+      return next();
+    }
+  };
+}
       };
       
       next();
