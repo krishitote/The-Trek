@@ -1,0 +1,13 @@
+# Netlify Configuration for The Trek
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  
+[build.environment]
+  VITE_API_URL = "https://the-trek.onrender.com"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
