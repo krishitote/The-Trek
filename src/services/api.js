@@ -108,3 +108,8 @@ export async function apiLeaderboards() {
     perGender: data.perGender || [],
   };
 }
+
+export async function apiQuickLeaderboard() {
+  const res = await fetch(`${API_URL}/api/leaderboards/quick`);
+  return handleResponse(res);
+}

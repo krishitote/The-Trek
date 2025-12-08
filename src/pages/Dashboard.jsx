@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import ActivityForm from "../components/ActivityForm";
 import ProgressChart from "../components/ProgressChart";
-import { apiActivities, apiUsers } from "../services/api";
+import { apiActivities, apiQuickLeaderboard } from "../services/api";
 import {
   Box,
   Heading,
@@ -48,28 +48,21 @@ export default function Dashboard() {
     if (!session?.token || !user) return;
     setLoading(true);
     try {
-      const [userActs, users] = await Promise.all([
+      const [userActs, leaderboard] = await Promise.all([
         apiActivities(session.accessToken, user.id),
-        apiUsers(),
+        apiQuickLeaderboard(),
       ]);
       setActivities(userActs);
-      setAllUsers(users);
+      setAllUsers(leaderboard);
 
-      // Compute ranking
-      const leaderboard = await Promise.all(
-        users.map(async (u) => {
-          const acts = await apiActivities(session.accessToken, u.id);
-          const totalDistance = acts.reduce((sum, a) => sum + Number(a.distance_km || 0), 0);
-          return { ...u, totalDistance };
-        })
-      );
-      leaderboard.sort((a, b) => b.totalDistance - a.totalDistance);
+      // Find user's rank from pre-computed leaderboard
       const rank = leaderboard.findIndex((u) => u.id === user.id) + 1;
+      const userStats = leaderboard.find((u) => u.id === user.id);
+      
       setUserRank({
         rank,
         totalUsers: leaderboard.length,
-        totalDistance:
-          leaderboard.find((u) => u.id === user.id)?.totalDistance || 0,
+        totalDistance: userStats?.total_distance || 0,
       });
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
