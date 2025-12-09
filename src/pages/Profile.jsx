@@ -15,18 +15,32 @@ import {
   SimpleGrid,
   Container,
   useToast,
+  FormControl,
+  FormLabel,
+  Select,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react";
 
 export default function Profile() {
   const { user, session, setUser } = useAuth();
   const toast = useToast();
+  
+  // Profile fields state
+  const [gender, setGender] = useState(user?.gender || "");
+  const [dateOfBirth, setDateOfBirth] = useState(user?.date_of_birth ? user.date_of_birth.split('T')[0] : "");
   const [weight, setWeight] = useState(user?.weight || "");
   const [height, setHeight] = useState(user?.height || "");
+  
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  
+  // Check if profile is incomplete
+  const isProfileIncomplete = !user?.gender || !user?.date_of_birth;
 
   // Calculate BMI
   const calculateBMI = (w, h) => {
@@ -52,18 +66,26 @@ export default function Profile() {
   };
 
   const handleSave = async () => {
-    if (!weight || !height) {
+    if (!gender || !dateOfBirth) {
       toast({
-        title: "Missing information",
-        description: "Please enter both weight and height.",
+        title: "Missing required information",
+        description: "Please provide your gender and date of birth.",
         status: "warning",
         duration: 3000,
         isClosable: true,
       });
       return;
     }
+    
     try {
       setLoading(true);
+      const payload = {
+        gender,
+        date_of_birth: dateOfBirth,
+        weight: weight ? Number(weight) : null,
+        height: height ? Number(height) : null,
+      };
+      
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/${user.id}`,
         {
@@ -72,7 +94,7 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.accessToken}`,
           },
-          body: JSON.stringify({ weight: Number(weight), height: Number(height) }),
+          body: JSON.stringify(payload),
         }
       );
       const data = await res.json();
@@ -195,14 +217,30 @@ export default function Profile() {
             
             {/* Photo Upload */}
             <VStack spacing={2}>
+              <Text fontSize="xs" color="whiteAlpha.800" textAlign="center">
+                📷 Recommended: 400x400px, max 5MB
+              </Text>
               <Input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/jpg"
                 id="photo-upload"
                 display="none"
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (!file) return;
+                  
+                  // Check file size (5MB = 5 * 1024 * 1024 bytes)
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast({
+                      title: "File too large",
+                      description: "Please choose an image under 5MB",
+                      status: "error",
+                      duration: 3000,
+                      isClosable: true,
+                    });
+                    return;
+                  }
+                  
                   setSelectedFile(file);
                   setPreview(URL.createObjectURL(file));
                 }}
@@ -238,9 +276,72 @@ export default function Profile() {
       </Box>
 
       <Container maxW="container.xl" pb={12}>
+        {/* Profile Completion Alert */}
+        {isProfileIncomplete && (
+          <Alert status="warning" borderRadius="xl" mb={6} boxShadow="md">
+            <AlertIcon />
+            <AlertDescription>
+              🎯 <strong>Complete your profile!</strong> Please provide your gender and date of birth to unlock all features and personalized insights.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Profile Details Form */}
+        <Box bg="white" p={8} borderRadius="2xl" boxShadow="lg" mb={8} border="2px solid" borderColor={isProfileIncomplete ? "orange.200" : "gray.100"}>
+          <Heading size="lg" mb={6} color="brand.500">
+            📝 Profile Details
+          </Heading>
+          
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+            <FormControl isRequired>
+              <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>Gender</FormLabel>
+              {editing ? (
+                <Select 
+                  value={gender} 
+                  onChange={(e) => setGender(e.target.value)}
+                  size="lg"
+                  focusBorderColor="brand.500"
+                  placeholder="Select gender"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </Select>
+              ) : (
+                <Text fontSize="xl" fontWeight="bold" color="brand.500" textTransform="capitalize">
+                  {gender || "Not set"}
+                </Text>
+              )}
+            </FormControl>
+
+            <FormControl isRequired>
+              <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>Date of Birth</FormLabel>
+              {editing ? (
+                <Input 
+                  type="date" 
+                  value={dateOfBirth} 
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  size="lg"
+                  focusBorderColor="brand.500"
+                  max={new Date().toISOString().split('T')[0]}
+                />
+              ) : (
+                <Text fontSize="xl" fontWeight="bold" color="brand.500">
+                  {dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : "Not set"}
+                </Text>
+              )}
+            </FormControl>
+          </SimpleGrid>
+        </Box>
+
         {/* Stats Cards with Health Metrics */}
         <Heading size="lg" mb={6} color="brand.500">
           📊 Health Stats
+          {!weight || !height ? (
+            <Text fontSize="sm" color="gray.600" fontWeight="normal" mt={2}>
+              💡 Add your weight and height to calculate your BMI and track your health progress
+            </Text>
+          ) : null}
         </Heading>
         
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>

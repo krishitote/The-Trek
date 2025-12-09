@@ -19,11 +19,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-// --- Update user profile (height, weight, etc.) ---
+// --- Update user profile (height, weight, gender, date_of_birth, etc.) ---
 router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) => {
   try {
     const { id } = req.params;
-    const { height, weight, age, gender, first_name, last_name } = req.body;
+    const { height, weight, gender, date_of_birth, first_name, last_name } = req.body;
 
     // ✅ Ensure users can only edit their own profile
     if (req.user.id !== parseInt(id)) {
@@ -35,13 +35,13 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
       `UPDATE users
        SET height = COALESCE($1, height),
            weight = COALESCE($2, weight),
-           age = COALESCE($3, age),
-           gender = COALESCE($4, gender),
+           gender = COALESCE($3, gender),
+           date_of_birth = COALESCE($4, date_of_birth),
            first_name = COALESCE($5, first_name),
            last_name = COALESCE($6, last_name)
        WHERE id = $7
-       RETURNING id, username, email, height, weight, age, gender, first_name, last_name, profile_image`,
-      [height, weight, age, gender, first_name, last_name, id]
+       RETURNING id, username, email, height, weight, gender, date_of_birth, first_name, last_name, profile_image`,
+      [height, weight, gender, date_of_birth, first_name, last_name, id]
     );
 
     if (result.rows.length === 0) {
