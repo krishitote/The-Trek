@@ -50,7 +50,7 @@ export async function processProfileImage(req, res, next) {
       fs.unlinkSync(originalPath);
     }
     
-    res.status(500).json({ error: 'Image processing failed' });
+    return res.status(500).json({ error: 'Image processing failed' });
   }
 }
 
