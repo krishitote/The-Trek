@@ -11,15 +11,13 @@ router.get('/quick', cacheMiddleware({ ttl: 300 }), async (req, res) => {
       SELECT 
         u.id,
         u.username,
-        u.first_name,
-        u.last_name,
         u.profile_image,
         COALESCE(SUM(a.distance_km), 0) as total_distance,
         COUNT(a.id) as activity_count,
         COALESCE(AVG(a.duration_min / NULLIF(a.distance_km, 0)), 0) as avg_pace
       FROM users u
       LEFT JOIN activities a ON u.id = a.user_id
-      GROUP BY u.id, u.username, u.first_name, u.last_name, u.profile_image
+      GROUP BY u.id, u.username, u.profile_image
       ORDER BY total_distance DESC
     `);
     
