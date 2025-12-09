@@ -58,15 +58,6 @@ export function cacheMiddleware(options = {}) {
     }
   };
 }
-      };
-      
-      next();
-    } catch (err) {
-      console.error('Cache middleware error:', err.message);
-      next(); // Continue without cache on error
-    }
-  };
-}
 
 // Invalidate cache helper
 export async function invalidateCache(pattern) {
