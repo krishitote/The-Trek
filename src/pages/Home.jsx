@@ -8,7 +8,6 @@ import {
   HStack,
   Spinner,
   Badge,
-  Avatar,
   SimpleGrid,
   Container,
 } from "@chakra-ui/react";
@@ -134,29 +133,26 @@ export default function Home() {
           🏆 Top 3 Champions
         </Heading>
         
-        <HStack spacing={{ base: 4, md: 8 }} justify="center" mb={16} flexWrap="wrap">
+        <HStack spacing={{ base: 2, md: 8 }} justify="center" mb={16} flexWrap="wrap" align="flex-end">
           {/* 2nd Place */}
           {allTime[1] && (
-            <VStack spacing={3}>
+            <VStack spacing={3} flex={{ base: "0 0 30%", md: "auto" }}>
               <Box
                 bg="gray.100"
-                w="80px"
-                h="100px"
+                w={{ base: "60px", md: "80px" }}
+                h={{ base: "80px", md: "100px" }}
                 borderRadius="xl"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
                 boxShadow="md"
               >
-                <Text fontSize="4xl">🥈</Text>
+                <Text fontSize={{ base: "3xl", md: "4xl" }}>🥈</Text>
               </Box>
-              <Avatar 
-                size="lg" 
-                name={allTime[1].username}
-                src={allTime[1].profile_image ? `${import.meta.env.VITE_API_URL}${allTime[1].profile_image}` : undefined}
-              />
-              <Text fontWeight="bold" fontSize="md">{allTime[1].username}</Text>
-              <Badge colorScheme="gray" fontSize="md" px={3} borderRadius="full">
+              <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} textAlign="center">
+                {allTime[1].username}
+              </Text>
+              <Badge colorScheme="gray" fontSize={{ base: "xs", md: "md" }} px={3} borderRadius="full">
                 {Number(allTime[1].total_distance || 0).toFixed(1)} km
               </Badge>
             </VStack>
@@ -164,28 +160,23 @@ export default function Home() {
 
           {/* 1st Place - Elevated */}
           {allTime[0] && (
-            <VStack spacing={3}>
+            <VStack spacing={3} flex={{ base: "0 0 35%", md: "auto" }}>
               <Box
                 bgGradient="linear(to-br, energy.500, energy.600)"
-                w="100px"
-                h="140px"
+                w={{ base: "80px", md: "100px" }}
+                h={{ base: "110px", md: "140px" }}
                 borderRadius="xl"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
                 boxShadow="2xl"
               >
-                <Text fontSize="5xl">🥇</Text>
+                <Text fontSize={{ base: "4xl", md: "5xl" }}>🥇</Text>
               </Box>
-              <Avatar 
-                size="2xl" 
-                name={allTime[0].username}
-                src={allTime[0].profile_image ? `${import.meta.env.VITE_API_URL}${allTime[0].profile_image}` : undefined}
-                border="4px solid"
-                borderColor="energy.500"
-              />
-              <Text fontWeight="black" fontSize="xl">{allTime[0].username}</Text>
-              <Badge colorScheme="orange" fontSize="lg" px={4} borderRadius="full">
+              <Text fontWeight="black" fontSize={{ base: "lg", md: "xl" }} textAlign="center">
+                {allTime[0].username}
+              </Text>
+              <Badge colorScheme="orange" fontSize={{ base: "md", md: "lg" }} px={4} borderRadius="full">
                 {Number(allTime[0].total_distance || 0).toFixed(1)} km
               </Badge>
             </VStack>
@@ -193,26 +184,23 @@ export default function Home() {
 
           {/* 3rd Place */}
           {allTime[2] && (
-            <VStack spacing={3}>
+            <VStack spacing={3} flex={{ base: "0 0 30%", md: "auto" }}>
               <Box
                 bg="orange.100"
-                w="80px"
-                h="80px"
+                w={{ base: "60px", md: "80px" }}
+                h={{ base: "65px", md: "80px" }}
                 borderRadius="xl"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
                 boxShadow="md"
               >
-                <Text fontSize="4xl">🥉</Text>
+                <Text fontSize={{ base: "3xl", md: "4xl" }}>🥉</Text>
               </Box>
-              <Avatar 
-                size="lg" 
-                name={allTime[2].username}
-                src={allTime[2].profile_image ? `${import.meta.env.VITE_API_URL}${allTime[2].profile_image}` : undefined}
-              />
-              <Text fontWeight="bold" fontSize="md">{allTime[2].username}</Text>
-              <Badge colorScheme="orange" fontSize="md" px={3} borderRadius="full">
+              <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} textAlign="center">
+                {allTime[2].username}
+              </Text>
+              <Badge colorScheme="orange" fontSize={{ base: "xs", md: "md" }} px={3} borderRadius="full">
                 {Number(allTime[2].total_distance || 0).toFixed(1)} km
               </Badge>
             </VStack>
