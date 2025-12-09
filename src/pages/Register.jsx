@@ -7,24 +7,18 @@ import {
   VStack,
   FormControl,
   FormLabel,
-  Select,
   useToast,
   Spinner,
+  Text,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
     username: "",
     email: "",
     password: "",
-    dateOfBirth: "",
-    gender: "Male",
-    weight: "",
-    height: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -35,24 +29,10 @@ export default function Register() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const calculateAge = (dob) => {
-    const birthDate = new Date(dob);
-    const diffMs = Date.now() - birthDate.getTime();
-    const ageDt = new Date(diffMs);
-    return Math.abs(ageDt.getUTCFullYear() - 1970);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !form.firstName ||
-      !form.lastName ||
-      !form.username ||
-      !form.email ||
-      !form.password ||
-      !form.dateOfBirth
-    ) {
+    if (!form.username || !form.email || !form.password) {
       toast({
         title: "Missing Fields",
         description: "Please fill all required fields.",
@@ -63,29 +43,18 @@ export default function Register() {
       return;
     }
 
-    const payload = {
-      firstName: form.firstName,
-      lastName: form.lastName,
-      username: form.username,
-      email: form.email,
-      password: form.password,
-      gender: form.gender,
-      age: calculateAge(form.dateOfBirth),
-      weight: form.weight ? Number(form.weight) : null,
-      height: form.height ? Number(form.height) : null,
-    };
-
     try {
       setLoading(true);
-      const success = await register(payload);
+      const success = await register(form);
       if (success) {
         toast({
           title: "Registration Successful",
+          description: "Please complete your profile to unlock all features.",
           status: "success",
-          duration: 2000,
+          duration: 3000,
           isClosable: true,
         });
-        navigate("/dashboard");
+        navigate("/profile");
       }
     } catch (err) {
       console.error("Registration failed:", err);
@@ -139,53 +108,43 @@ export default function Register() {
         borderColor="energy.500"
       >
         <form onSubmit={handleSubmit}>
-        <VStack spacing={4}>
+        <VStack spacing={5}>
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.500">First Name</FormLabel>
-            <Input name="firstName" placeholder="Enter your first name" value={form.firstName} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.500">Last Name</FormLabel>
-            <Input name="lastName" placeholder="Enter your last name" value={form.lastName} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.500">Username</FormLabel>
-            <Input name="username" placeholder="Enter your username" value={form.username} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
+            <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>Username</FormLabel>
+            <Input 
+              name="username" 
+              placeholder="Choose a username" 
+              value={form.username} 
+              onChange={handleChange} 
+              size="lg" 
+              focusBorderColor="brand.500" 
+            />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.500">Email</FormLabel>
-            <Input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
+            <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>Email</FormLabel>
+            <Input 
+              name="email" 
+              type="email" 
+              placeholder="your@email.com" 
+              value={form.email} 
+              onChange={handleChange} 
+              size="lg" 
+              focusBorderColor="brand.500" 
+            />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.500">Password</FormLabel>
-            <Input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel fontWeight="bold" color="brand.500">Date of Birth</FormLabel>
-            <Input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel fontWeight="bold" color="brand.500">Gender</FormLabel>
-            <Select name="gender" value={form.gender} onChange={handleChange} size="lg" focusBorderColor="brand.500">
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </Select>
-          </FormControl>
-
-          <FormControl>
-            <FormLabel fontWeight="bold" color="brand.500">Weight (kg)</FormLabel>
-            <Input name="weight" type="number" placeholder="Enter your weight" value={form.weight} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel fontWeight="bold" color="brand.500">Height (cm)</FormLabel>
-            <Input name="height" type="number" placeholder="Enter your height" value={form.height} onChange={handleChange} size="lg" focusBorderColor="brand.500" />
+            <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>Password</FormLabel>
+            <Input 
+              name="password" 
+              type="password" 
+              placeholder="Min 8 chars (uppercase, lowercase, number)" 
+              value={form.password} 
+              onChange={handleChange} 
+              size="lg" 
+              focusBorderColor="brand.500" 
+            />
           </FormControl>
 
           <Button
@@ -195,6 +154,7 @@ export default function Register() {
             bgGradient="linear(to-r, energy.500, energy.600)"
             color="white"
             fontWeight="bold"
+            fontSize={{ base: "md", md: "lg" }}
             borderRadius="full"
             _hover={{
               bgGradient: "linear(to-r, energy.600, energy.500)",
@@ -202,7 +162,7 @@ export default function Register() {
             }}
             isDisabled={loading}
           >
-            {loading ? <Spinner size="sm" /> : "🚀 Register"}
+            {loading ? <Spinner size="sm" /> : "🚀 Create Account"}
           </Button>
         </VStack>
       </form>

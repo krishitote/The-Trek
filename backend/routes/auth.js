@@ -23,35 +23,15 @@ const router = express.Router();
 // Register
 router.post("/register", authLimiter, validateRegistration, async (req, res) => {
   try {
-    const { 
-      username, 
-      email, 
-      password,
-      first_name,
-      last_name,
-      gender,
-      age,
-      weight,
-      height
-    } = req.body;
+    const { username, email, password } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      `INSERT INTO users (username, email, password, first_name, last_name, gender, age, weight, height)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, username, email, first_name, last_name, gender, age, weight, height`,
-      [
-        username, 
-        email, 
-        hashedPassword,
-        first_name || null,
-        last_name || null,
-        gender || null,
-        age || null,
-        weight || null,
-        height || null
-      ]
+      `INSERT INTO users (username, email, password)
+       VALUES ($1, $2, $3)
+       RETURNING id, username, email`,
+      [username, email, hashedPassword]
     );
 
     const user = result.rows[0];

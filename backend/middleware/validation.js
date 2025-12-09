@@ -29,12 +29,6 @@ export const validateRegistration = (req, res, next) => {
       .messages({
         'string.pattern.base': 'Password must contain uppercase, lowercase, and number'
       }),
-    first_name: Joi.string().max(100).allow('').optional(),
-    last_name: Joi.string().max(100).allow('').optional(),
-    gender: Joi.string().valid('male', 'female', 'other').allow(null).optional(),
-    age: Joi.number().integer().min(13).max(120).allow(null).optional(),
-    weight: Joi.number().positive().max(500).allow(null).optional(),
-    height: Joi.number().positive().max(300).allow(null).optional(),
   });
 
   const { error } = schema.validate(req.body);
@@ -65,10 +59,10 @@ export const validateProfileUpdate = (req, res, next) => {
   const schema = Joi.object({
     first_name: Joi.string().max(100).allow('').optional(),
     last_name: Joi.string().max(100).allow('').optional(),
+    gender: Joi.string().valid('male', 'female', 'other').required(),
+    date_of_birth: Joi.date().max('now').required(),
     weight: Joi.number().positive().max(500).allow(null).optional(),
     height: Joi.number().positive().max(300).allow(null).optional(),
-    gender: Joi.string().valid('male', 'female', 'other').allow(null).optional(),
-    age: Joi.number().integer().min(13).max(120).allow(null).optional(),
   }).min(1); // At least one field required
 
   const { error } = schema.validate(req.body);

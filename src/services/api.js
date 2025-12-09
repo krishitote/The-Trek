@@ -51,31 +51,11 @@ export async function apiLogin({ username, password }) {
   return handleResponse(res);
 }
 
-export async function apiRegister({
-  firstName,
-  lastName,
-  username,
-  email,
-  password,
-  gender,
-  age,
-  weight,
-  height,
-}) {
+export async function apiRegister({ username, email, password }) {
   const res = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      first_name: firstName,
-      last_name: lastName,
-      username,
-      email,
-      password,
-      gender,
-      age,
-      weight,
-      height,
-    }),
+    body: JSON.stringify({ username, email, password }),
   });
   return handleResponse(res);
 }
