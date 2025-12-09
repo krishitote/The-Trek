@@ -28,6 +28,21 @@ node test-db.mjs
 ## Migration Files
 
 ### 001_add_refresh_tokens.sql
+- **Date:** 2025-11-24
+- **Description:** Adds refresh token support for JWT authentication
+- **Changes:**
+  - Adds `refresh_token` column (TEXT)
+  - Adds `refresh_token_expires` column (TIMESTAMP)
+  - Creates index on `refresh_token` for faster lookups
+
+### 002_add_date_of_birth.sql
+- **Date:** 2025-12-09
+- **Description:** Replaces age integer with date_of_birth for accurate age calculation
+- **Changes:**
+  - Adds `date_of_birth` column (DATE)
+  - Creates index on `date_of_birth` for birthday queries
+  - Adds constraint to ensure date_of_birth is in the past
+  - Optional: Comment to drop old `age` column
 - **Purpose**: Add JWT refresh token support
 - **Changes**:
   - Adds `refresh_token` TEXT column to users table
