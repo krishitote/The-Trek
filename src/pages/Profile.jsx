@@ -1,7 +1,9 @@
 // src/pages/Profile.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import GoogleFitConnect from "../components/GoogleFitConnect";
+import { apiGetEarnedBadges } from "../services/api";
 import {
   Box,
   Heading,
@@ -25,6 +27,7 @@ import {
 
 export default function Profile() {
   const { user, session, setUser } = useAuth();
+  const navigate = useNavigate();
   const toast = useToast();
   
   // Profile fields state
@@ -38,9 +41,19 @@ export default function Profile() {
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [earnedBadges, setEarnedBadges] = useState([]);
   
   // Check if profile is incomplete
   const isProfileIncomplete = !user?.gender || !user?.date_of_birth;
+
+  // Load earned badges
+  useEffect(() => {
+    if (session?.accessToken) {
+      apiGetEarnedBadges(session.accessToken)
+        .then(badges => setEarnedBadges(badges))
+        .catch(err => console.error('Failed to load badges:', err));
+    }
+  }, [session?.accessToken]);
 
   // Calculate BMI
   const calculateBMI = (w, h) => {
@@ -129,11 +142,19 @@ export default function Profile() {
     formData.append("photo", selectedFile);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const res = await fetch(`${API_URL}/api/upload`, {
         method: "POST",
         headers: { Authorization: `Bearer ${session.accessToken}` },
         body: formData,
       });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Upload failed:", errorText);
+        throw new Error(`Upload failed with status ${res.status}`);
+      }
+      
       const data = await res.json();
       if (res.ok) {
         const updatedUser = { ...user, profile_image: data.profile_image };
@@ -489,6 +510,52 @@ export default function Profile() {
             </HStack>
             <GoogleFitConnect />
           </HStack>
+        </Box>
+
+        {/* Badges Showcase */}
+        <Box bg="white" p={8} borderRadius="2xl" boxShadow="lg">
+          <HStack justify="space-between" mb={6}>
+            <Heading size="lg" color="orange.600">
+              🏆 Achievement Badges ({earnedBadges.length})
+            </Heading>
+            <Button
+              size="sm"
+              variant="outline"
+              colorScheme="orange"
+              onClick={() => navigate('/badges')}
+            >
+              View All
+            </Button>
+          </HStack>
+          
+          {earnedBadges.length === 0 ? (
+            <Box textAlign="center" py={8}>
+              <Text fontSize="4xl" mb={2}>🎯</Text>
+              <Text color="gray.600">No badges earned yet. Complete activities to earn your first badge!</Text>
+            </Box>
+          ) : (
+            <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing={4}>
+              {earnedBadges.slice(0, 6).map((badge) => (
+                <VStack
+                  key={badge.id}
+                  p={4}
+                  bg="gradient-to-br from-yellow-50 to-orange-50"
+                  borderRadius="xl"
+                  borderWidth="2px"
+                  borderColor="orange.200"
+                  transition="all 0.3s"
+                  _hover={{ transform: 'scale(1.05)', boxShadow: 'lg' }}
+                  cursor="pointer"
+                  onClick={() => navigate('/badges')}
+                >
+                  <Text fontSize="4xl">{badge.icon}</Text>
+                  <Text fontSize="xs" fontWeight="bold" textAlign="center" noOfLines={2}>
+                    {badge.name}
+                  </Text>
+                </VStack>
+              ))}
+            </SimpleGrid>
+          )}
         </Box>
 
         {/* Action Buttons */}

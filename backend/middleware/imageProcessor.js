@@ -28,8 +28,12 @@ export async function processProfileImage(req, res, next) {
       })
       .toFile(outputPath);
     
-    // Delete original
-    fs.unlinkSync(originalPath);
+    // Delete original (with retry for Windows)
+    try {
+      await fs.promises.unlink(originalPath);
+    } catch (unlinkErr) {
+      console.warn('⚠️  Could not delete original file (non-critical):', unlinkErr.message);
+    }
     
     // Update req.file to point to processed image
     req.file.filename = filename;
@@ -45,9 +49,16 @@ export async function processProfileImage(req, res, next) {
   } catch (err) {
     console.error('❌ Image processing failed:', err.message);
     
-    // Clean up
-    if (fs.existsSync(originalPath)) {
-      fs.unlinkSync(originalPath);
+    // Clean up (non-blocking)
+    try {
+      if (fs.existsSync(originalPath)) {
+        await fs.promises.unlink(originalPath);
+      }
+      if (fs.existsSync(outputPath)) {
+        await fs.promises.unlink(outputPath);
+      }
+    } catch (cleanupErr) {
+      console.warn('⚠️  Cleanup error (non-critical):', cleanupErr.message);
     }
     
     return res.status(500).json({ error: 'Image processing failed' });

@@ -13,7 +13,19 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { apiSubmitActivity } from "../services/api";
 
-const ACTIVITY_TYPES = ["Running", "Walking", "Cycling", "Swimming", "Steps", "Other"];
+const ACTIVITY_TYPES = ["Running", "Walking", "Cycling", "Swimming", "Steps", "Hiking", "Other"];
+
+const POPULAR_LOCATIONS = [
+  "Ngong Hills",
+  "Mt. Longonot",
+  "Mt. Kenya",
+  "Karura Forest",
+  "Aberdare Ranges",
+  "Hell's Gate",
+  "City Park",
+  "Uhuru Park",
+  "Other"
+];
 
 export default function ActivityForm({ onActivityAdded }) {
   const { user, session } = useAuth();
@@ -22,12 +34,15 @@ export default function ActivityForm({ onActivityAdded }) {
   const [distance, setDistance] = useState(5);
   const [duration, setDuration] = useState(30);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 16));
+  const [location, setLocation] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
+  const [elevationGain, setElevationGain] = useState(0);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user || !session?.token) {
+    if (!user || !session?.accessToken) {
       toast({
         title: "Please log in to submit an activity.",
         status: "warning",
@@ -61,11 +76,15 @@ export default function ActivityForm({ onActivityAdded }) {
     setLoading(true);
 
     try {
+      const finalLocation = location === "Other" ? customLocation.trim() : location;
+      
       await apiSubmitActivity(session.accessToken, {
         type: finalType,
         distance_km: distance,
         duration_min: duration,
         date,
+        location: finalLocation || null,
+        elevation_gain: elevationGain || 0,
       });
 
       toast({
@@ -80,6 +99,9 @@ export default function ActivityForm({ onActivityAdded }) {
       setCustomType("");
       setDistance(5);
       setDuration(30);
+      setLocation("");
+      setCustomLocation("");
+      setElevationGain(0);
       setDate(new Date().toISOString().slice(0, 16));
 
       onActivityAdded?.();
@@ -138,6 +160,42 @@ export default function ActivityForm({ onActivityAdded }) {
               onChange={(e) => setDuration(Number(e.target.value))}
             />
           </FormControl>
+
+          <FormControl>
+            <FormLabel>Location (Optional)</FormLabel>
+            <Select value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Select location">
+              {POPULAR_LOCATIONS.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+
+          {location === "Other" && (
+            <FormControl>
+              <FormLabel>Custom Location</FormLabel>
+              <Input
+                type="text"
+                value={customLocation}
+                onChange={(e) => setCustomLocation(e.target.value)}
+                placeholder="Enter location name"
+              />
+            </FormControl>
+          )}
+
+          {(type === "Hiking" || location.includes("Mt")) && (
+            <FormControl>
+              <FormLabel>Elevation Gain (meters) - Optional</FormLabel>
+              <Input
+                type="number"
+                value={elevationGain}
+                onChange={(e) => setElevationGain(Number(e.target.value))}
+                min="0"
+                placeholder="0"
+              />
+            </FormControl>
+          )}
 
           <FormControl>
             <FormLabel>Date & Time</FormLabel>

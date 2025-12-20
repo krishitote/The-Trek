@@ -2,9 +2,10 @@
 import rateLimit from 'express-rate-limit';
 
 // Authentication endpoints - strict limits to prevent brute force
+// Relaxed for development
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
+  max: process.env.NODE_ENV === 'development' ? 50 : 5, // 50 in dev, 5 in production
   message: { 
     error: 'Too many login attempts. Please try again in 15 minutes.' 
   },

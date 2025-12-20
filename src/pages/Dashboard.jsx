@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import ActivityForm from "../components/ActivityForm";
 import ProgressChart from "../components/ProgressChart";
+import EnhancedStats from "../components/EnhancedStats";
 import { apiActivities, apiQuickLeaderboard } from "../services/api";
 import {
   Box,
@@ -45,7 +46,7 @@ export default function Dashboard() {
   const [showUserActivities, setShowUserActivities] = useState(false);
 
   const fetchData = async () => {
-    if (!session?.token || !user) return;
+    if (!session?.accessToken || !user) return;
     setLoading(true);
     try {
       const [userActs, leaderboard] = await Promise.all([
@@ -72,8 +73,8 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (user && session?.token) fetchData();
-  }, [user, session?.token]);
+    if (user && session?.accessToken) fetchData();
+  }, [user, session?.accessToken]);
 
   if (loading) {
     return (
@@ -173,7 +174,7 @@ export default function Dashboard() {
           leftIcon={<Text fontSize="xl">📈</Text>}
           onClick={() => setShowChart(!showChart)}
         >
-          Progress Chart
+          Old Progress Chart
         </Button>
 
         <Button
@@ -190,6 +191,11 @@ export default function Dashboard() {
           {showUserActivities ? "Hide" : "View"} Activities
         </Button>
       </HStack>
+
+      {/* Enhanced Stats Dashboard */}
+      <Box mb={8}>
+        <EnhancedStats />
+      </Box>
 
       {/* Collapsible Sections */}
       <Collapse in={showSubmitForm} animateOpacity>

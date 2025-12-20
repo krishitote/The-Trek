@@ -15,6 +15,12 @@ import userRoutes from "./routes/users.js";
 import uploadRoutes from "./routes/upload.js";
 import googleFitRoutes from "./routes/googlefit.js";
 import leaderboardRoutes from "./routes/leaderboards.js";
+import communityRoutes from "./routes/communities.js";
+import championshipRoutes from "./routes/championships.js";
+import adminRoutes from "./routes/admin.js";
+import statsRoutes from "./routes/stats.js";
+import badgeRoutes from "./routes/badges.js";
+import socialRoutes from "./routes/social.js";
 import { apiLimiter, uploadLimiter, activityLimiter } from "./middleware/rateLimiter.js";
 import { validateProfileUpdate } from "./middleware/validation.js";
 import { connectRedis } from "./config/redis.js";
@@ -41,6 +47,11 @@ const allowedOrigins = [
   "https://www.trekfit.co.ke",      // ✅ www version
   "https://the-trek.netlify.app",   // Keep as backup
   "http://localhost:5173",          // For local testing
+  "http://localhost:5174",          // Alternate Vite port
+  "http://localhost:5175",          // Alternate Vite port
+  "http://localhost:5176",          // Alternate Vite port
+  "http://localhost:5177",          // Alternate Vite port
+  "http://localhost:5178",          // Alternate Vite port
 ];
 
 app.use(
@@ -77,6 +88,12 @@ app.use("/api/activities", activityRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/leaderboards", leaderboardRoutes);
 app.use("/api/googlefit", googleFitRoutes);
+app.use("/api/communities", communityRoutes);
+app.use("/api/championships", championshipRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/badges", badgeRoutes);
+app.use("/api/social", socialRoutes);
 
 // ✅ Photo upload routes (with upload-specific rate limiting)
 app.use("/api/upload", uploadLimiter, uploadRoutes);

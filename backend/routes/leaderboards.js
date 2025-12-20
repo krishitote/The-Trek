@@ -11,13 +11,12 @@ router.get('/quick', cacheMiddleware({ ttl: 300 }), async (req, res) => {
       SELECT 
         u.id,
         u.username,
-        u.profile_image,
         COALESCE(SUM(a.distance_km), 0) as total_distance,
         COUNT(a.id) as activity_count,
         COALESCE(AVG(a.duration_min / NULLIF(a.distance_km, 0)), 0) as avg_pace
       FROM users u
       LEFT JOIN activities a ON u.id = a.user_id
-      GROUP BY u.id, u.username, u.profile_image
+      GROUP BY u.id, u.username
       ORDER BY total_distance DESC
     `);
     
@@ -48,6 +47,7 @@ router.get('/', cacheMiddleware({ ttl: 600 }), async (req, res) => {
       pool.query(`
         SELECT a.type, u.id as user_id, u.username, u.gender,
                SUM(a.distance_km) AS total_distance,
+               COUNT(a.id) as activity_count,
                AVG(a.duration_min / NULLIF(a.distance_km,0)) AS avg_pace
         FROM activities a
         JOIN users u ON a.user_id = u.id
@@ -57,8 +57,9 @@ router.get('/', cacheMiddleware({ ttl: 600 }), async (req, res) => {
       `),
       
       pool.query(`
-        SELECT u.gender, u.id as user_id, u.username,
+        SELECT LOWER(u.gender) as gender, u.id as user_id, u.username,
                SUM(a.distance_km) AS total_distance,
+               COUNT(a.id) as activity_count,
                AVG(a.duration_min / NULLIF(a.distance_km,0)) AS avg_pace
         FROM activities a
         JOIN users u ON a.user_id = u.id

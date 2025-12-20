@@ -67,8 +67,10 @@ const theme = extendTheme({
   },
 
   fonts: {
-    heading: "'Montserrat', 'Poppins', sans-serif",  // Bold, energetic
-    body: "'Inter', 'Open Sans', sans-serif",        // Clean, readable
+    heading: "'Exo 2', 'Righteous', 'Russo One', -apple-system, BlinkMacSystemFont, sans-serif",  // Bold, impactful, sporty
+    body: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",        // Clean, readable, professional
+    mono: "'Fira Code', 'Courier New', monospace",
+    accent: "'Bebas Neue', 'Teko', sans-serif",  // For numbers, stats, and impact text
   },
 
   fontSizes: {
@@ -82,15 +84,46 @@ const theme = extendTheme({
     "4xl": "2.25rem",
     "5xl": "3rem",
     "6xl": "3.75rem",
+    "7xl": "4.5rem",
+    "8xl": "6rem",
+  },
+
+  fontWeights: {
+    hairline: 100,
+    thin: 200,
+    light: 300,
+    normal: 400,
+    medium: 500,
+    semibold: 600,
+    bold: 700,
+    extrabold: 800,
+    black: 900,
+  },
+
+  letterSpacings: {
+    tighter: "-0.05em",
+    tight: "-0.025em",
+    normal: "0",
+    wide: "0.025em",
+    wider: "0.05em",
+    widest: "0.1em",
   },
 
   components: {
     Button: {
       baseStyle: {
         borderRadius: "full",     // Pill-shaped (organic)
-        fontWeight: "700",
-        letterSpacing: "0.5px",
+        fontWeight: "600",
+        letterSpacing: "0.025em",
         transition: "all 0.3s ease",
+        fontFamily: "'Poppins', sans-serif",
+        _hover: {
+          transform: "translateY(-2px)",
+          boxShadow: "lg",
+        },
+        _active: {
+          transform: "translateY(0)",
+        },
       },
       variants: {
         solid: (props) => ({

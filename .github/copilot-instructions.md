@@ -8,22 +8,33 @@
 ## Architecture & Data Flow
 
 ### Three-Tier Structure
-1. **Web App** (`src/`) - React 18 + Vite, Chakra UI, React Router v7
+1. **Web App** (`src/`) - React 18 + Vite, Chakra UI v2 + Tailwind CSS v3, React Router v7
 2. **Mobile App** (`the-trek-mobile/`) - React Native + Expo, Paper UI (feature parity incomplete)
-3. **Backend** (`backend/`) - Express.js (ES modules), PostgreSQL via `pg`, JWT auth
+3. **Backend** (`backend/`) - Express.js (ES modules), PostgreSQL via `pg`, JWT auth with refresh tokens
 
-### Critical Flow: Authentication
-- **Registration/Login** → JWT token (7-day expiry) stored in `localStorage` (web) / `AsyncStorage` (mobile)
-- **All protected routes** require `Authorization: Bearer <token>` header
-- Middleware: `backend/middleware/authMiddleware.js` decodes JWT, attaches `req.user.id`
-- Frontend: `src/context/AuthContext.jsx` provides `{ user, session, login, logout }` via React Context
+### Critical Flow: Authentication (Dual-Token System)
+- **Registration/Login** → Returns `{ accessToken, refreshToken, user }` 
+- **Access Token:** 15-min expiry, used for all API calls (`Authorization: Bearer <token>`)
+- **Refresh Token:** 7-day expiry, stored in database, auto-rotates every 14 minutes client-side
+- **Auth Flow:**
+  1. Login → Store both tokens in `localStorage` (web) / `AsyncStorage` (mobile)
+  2. Frontend (`AuthContext.jsx`) auto-refreshes access token via `setInterval(14min)`
+  3. If refresh fails → Force logout
+- **Middleware:** `backend/middleware/authMiddleware.js` decodes JWT, attaches `req.user.id`
+- **Token Utils:** `backend/utils/tokens.js` - `generateAccessToken()`, `generateRefreshToken()`, `verifyAccessToken()`
 
 ### Data Entities
-**PostgreSQL Schema:**
+**PostgreSQL Schema (Updated):**
 ```sql
-users (id, username, email, password, weight, height, profile_image)
+users (
+  id, username, email, password, 
+  weight, height, profile_image,
+  first_name, last_name, gender, date_of_birth,  -- Added via migrations
+  refresh_token, refresh_token_expires           -- Added via migrations
+)
 activities (id, user_id, type, distance_km, duration_min, date)
 ```
+**Schema Evolution:** Database uses migrations (`backend/migrations/*.sql`), not seed files. Run via Neon SQL Editor or `psql`.  
 No ORM - raw SQL with parameterized queries (`$1`, `$2`) for injection safety.
 
 ## Development Workflows
@@ -32,7 +43,7 @@ No ORM - raw SQL with parameterized queries (`$1`, `$2`) for injection safety.
 ```powershell
 # Frontend (root directory)
 npm install
-npm run dev  # http://localhost:5173
+npm run dev  # http://localhost:5173, HMR enabled
 
 # Backend (backend/ directory)
 cd backend
@@ -42,7 +53,7 @@ npm run dev  # Uses nodemon, runs on port 5000
 # Mobile (the-trek-mobile/ directory)
 cd the-trek-mobile
 npm install
-npm start  # Expo dev server
+npm start  # Expo dev server, scan QR with Expo Go app
 ```
 
 ### Environment Variables
@@ -55,18 +66,22 @@ VITE_GOOGLE_CLIENT_ID=...           # For Google Fit OAuth
 **Backend (`backend/.env`):**
 ```bash
 DATABASE_URL=postgresql://...       # Neon connection string
-JWT_SECRET=...                      # Min 32 chars for security
+JWT_SECRET=...                      # Min 32 chars for security (used by jsonwebtoken)
 PORT=5000
+REDIS_URL=...                       # Optional - app works without Redis (graceful fallback)
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 ```
 
-### Deployment (Git Push Auto-Deploy)
-1. **Commit changes:** `git add . && git commit -m "message" && git push origin main`
-2. **Render auto-deploys backend** (monitors `backend/` folder)
-3. **TrueHost serves frontend** (build: `npm run build` → `dist/`)
-4. **Test production:** Visit https://trekfit.co.ke, check Render logs for errors
+### Deployment (Manual Frontend, Auto Backend)
+1. **Backend (Auto-Deploy):** Push to `main` → Render auto-deploys (monitors `backend/` folder)
+2. **Frontend (Manual Upload to TrueHost):**
+   - Build: `npm run build` → Creates `dist/` folder
+   - Upload entire `dist/` contents to TrueHost via cPanel File Manager
+   - Keep `.htaccess` for SPA routing (if exists)
+3. **Test production:** Visit https://trekfit.co.ke, check Render logs for backend errors
+4. **Database Migrations:** Run SQL files from `backend/migrations/` via Neon SQL Editor
 
 ## Project-Specific Conventions
 
@@ -75,26 +90,40 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
    - Example: `backend/routes/activities.js` exports Express router, imported as `activityRoutes`
 2. **Validation First:** Use Joi middleware (`backend/middleware/validation.js`) before route handlers
    - Applied: `router.post("/", authenticateToken, validateActivity, async (req, res) => {...})`
+   - All POST/PUT routes MUST have Joi validators (security requirement)
 3. **Error Handling:** Catch-all errors return `{ error: 'message' }` (no stack traces in production)
-4. **CORS:** Whitelist domains in `server.js` line 32-37 (`allowedOrigins` array)
+4. **CORS:** Whitelist domains in `server.js` line 38-42 (`allowedOrigins` array)
+5. **Logging:** Winston logger (`backend/config/logger.js`) logs to `backend/logs/` with request IDs
 
 ### Frontend Patterns
 1. **API Calls:** Centralized in `src/services/api.js` (exports `apiLogin`, `apiSubmitActivity`, etc.)
    - Always use `import.meta.env.VITE_API_URL` for base URL
+   - All authenticated calls use `authHeaders(token)` helper
 2. **Auth Context:** Access via `const { user, session } = useAuth()` (imported from `src/context/AuthContext.jsx`)
+   - `session` contains `{ accessToken, refreshToken }`
+   - Auto-refresh logic runs every 14 minutes
 3. **Protected Routes:** Check `user` in component, redirect to `/login` if null
-4. **Chakra UI Theming:** Use `useColorMode()` for dark/light toggle, colors from `src/theme.js`
+4. **Styling:** Chakra UI v2 + Tailwind CSS v3 hybrid approach
+   - Chakra for components (`<Button>`, `<Box>`), Tailwind for utilities (`className="mt-4"`)
+   - Theme colors in `src/theme.js` - Forest Green, Sunrise Orange, Sky Blue
+   - Use `useColorMode()` for dark/light toggle
 
 ### Performance Critical
 ⚠️ **N+1 Query Anti-Pattern:** Dashboard previously fetched activities for EVERY user individually
 - **Solution:** Use `/api/leaderboards/quick` endpoint (single query with SQL aggregation)
-- **File:** `backend/routes/leaderboards.js` line 6-25 (optimized with `LEFT JOIN` and `SUM()`)
+- **File:** `backend/routes/leaderboards.js` line 8-25 (optimized with `LEFT JOIN` and `SUM()`)
+- **Caching:** Redis cache middleware with 5-minute TTL (gracefully disabled if Redis unavailable)
 
 ### Security Patterns
 1. **Input Validation:** All POST/PUT routes MUST use Joi validators (see `backend/middleware/validation.js`)
-2. **Rate Limiting:** Apply `authLimiter` to `/api/login` and `/api/register` (5 attempts/15min)
+2. **Rate Limiting:** 4-tier system via `backend/middleware/rateLimiter.js`
+   - `authLimiter`: 5 attempts/15min on `/api/auth/login` & `/api/auth/register`
+   - `apiLimiter`: 100 requests/15min on all `/api/*` routes
+   - `uploadLimiter`: 10 uploads/hour on `/api/upload`
+   - `activityLimiter`: 10 activities/minute on activity submission
 3. **Password Requirements:** Min 8 chars, must contain uppercase, lowercase, digit (enforced in `validateRegistration`)
-4. **File Uploads:** Max 5MB, images only (JPEG/PNG), stored in `backend/uploads/` with user ID prefix
+4. **File Uploads:** Max 5MB, images only (JPEG/PNG), optimized with Sharp, stored in `backend/uploads/` with user ID prefix
+5. **Token Security:** Access tokens expire in 15 minutes, refresh tokens in 7 days (stored in DB, rotated on use)
 
 ## Key Integration Points
 
@@ -107,12 +136,19 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 ### Leaderboard Generation (Performance-Sensitive)
 - **Endpoint:** `GET /api/leaderboards` (full data) or `/api/leaderboards/quick` (dashboard)
 - **Query:** Aggregates with `SUM(distance_km)`, `AVG(duration_min/distance_km)` grouped by user/type/gender
-- **Caching:** None yet (TODO: Redis for 5-minute cache)
+- **Caching:** Redis cache middleware with 5-min TTL for `/quick`, 10-min for full leaderboards
+- **Cache Invalidation:** Automatically clears cache when new activity submitted (`invalidateCache` in `activities.js`)
 
 ### Chart.js Integration
 - **Component:** `src/components/ProgressChart.jsx` uses `react-chartjs-2` wrapper
 - **Data Format:** Array of `{ date: ISO string, distance_km: number }` sorted by date ASC
 - **Tip:** Always filter out null distances to avoid rendering errors
+
+### Redis Caching (Optional)
+- **Config:** `backend/config/redis.js` with graceful fallback if unavailable
+- **Middleware:** `backend/middleware/cache.js` provides `cacheMiddleware(options)`
+- **Usage:** `router.get('/endpoint', cacheMiddleware({ ttl: 300 }), handler)`
+- **Important:** App works fully without Redis - caching is performance enhancement only
 
 ## Common Pitfalls
 
@@ -121,6 +157,9 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 3. **Database Connection:** Use `pool.query()` not `pool.connect().query()` (connection leaks)
 4. **Mobile API URL:** Hardcoded in `the-trek-mobile/api/index.js` (should use env var)
 5. **BMI Calculation:** Weight in kg, height in cm → formula: `weight / ((height/100)²)` in `server.js`
+6. **Redis Unavailable:** Don't assume Redis exists - check `getRedisClient()` returns null, skip caching gracefully
+7. **Token Refresh Loop:** Auto-refresh runs every 14 minutes - avoid creating multiple intervals
+8. **Cache Invalidation:** When modifying data (POST/PUT/DELETE), call `invalidateCache(pattern)` to clear stale cache
 
 ## Testing Checklist (Before Deploy)
 - [ ] Run `npm run dev` for both frontend and backend, test locally
@@ -146,5 +185,5 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 
 ---
 
-**Last Updated:** November 24, 2025  
+**Last Updated:** December 19, 2025  
 **Repo:** https://github.com/krishitote/The-Trek

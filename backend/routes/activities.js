@@ -5,6 +5,7 @@ import { authenticateToken } from "../middleware/authMiddleware.js";
 import { validateActivity } from '../middleware/validation.js';
 import { activityLimiter } from '../middleware/rateLimiter.js';
 import { invalidateCache } from '../middleware/cache.js';
+import { checkAndAwardBadges } from './badges.js';
 
 const router = express.Router();
 
@@ -21,10 +22,19 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
       [userId, type, distance_km, duration_min, date || new Date()]
     );
 
+    const activity = result.rows[0];
+
+    // Check and award badges asynchronously
+    checkAndAwardBadges(userId, activity.id).then(newBadges => {
+      if (newBadges.length > 0) {
+        console.log(`🏆 User ${userId} earned badges:`, newBadges.join(', '));
+      }
+    }).catch(err => console.error('Badge check error:', err));
+
     // Invalidate leaderboard cache when new activity added
     await invalidateCache('cache:GET:/api/leaderboards*');
     
-    res.json(result.rows[0]);
+    res.json({ ...activity, newBadges: [] }); // Will send badges via separate endpoint
   } catch (err) {
     console.error("Activity creation failed:", err.message);
     res.status(500).json({ error: err.message });
