@@ -17,20 +17,28 @@ export default function InstallPWA({ variant = 'button', size = 'md', colorSchem
   useEffect(() => {
     // Don't show if already installed
     if (isPWA()) {
+      console.log('[InstallPWA] App already installed as PWA');
       return;
     }
 
-    setupInstallPrompt((installable) => {
+    console.log('[InstallPWA] Setting up install prompt listener');
+    const cleanup = setupInstallPrompt((installable) => {
+      console.log('[InstallPWA] Install prompt available:', installable);
       setCanInstall(installable);
     });
+
+    // Cleanup on unmount
+    return cleanup;
   }, []);
 
   const handleInstall = async () => {
+    console.log('[InstallPWA] Install button clicked');
     setInstalling(true);
     try {
-      const { outcome } = await showInstallPrompt();
+      const result = await showInstallPrompt();
+      console.log('[InstallPWA] Install result:', result);
       
-      if (outcome === 'accepted') {
+      if (result.outcome === 'accepted') {
         toast({
           title: 'App Installing!',
           description: 'The Trek is being added to your home screen',
@@ -38,7 +46,7 @@ export default function InstallPWA({ variant = 'button', size = 'md', colorSchem
           duration: 3000,
         });
         setCanInstall(false);
-      } else if (outcome === 'dismissed') {
+      } else if (result.outcome === 'dismissed') {
         toast({
           title: 'Install Cancelled',
           description: 'You can install later from the menu',
@@ -54,7 +62,7 @@ export default function InstallPWA({ variant = 'button', size = 'md', colorSchem
         });
       }
     } catch (error) {
-      console.error('Install error:', error);
+      console.error('[InstallPWA] Install error:', error);
       toast({
         title: 'Install Failed',
         description: error.message,

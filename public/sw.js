@@ -1,5 +1,5 @@
 // public/sw.js - Service Worker
-const CACHE_NAME = 'the-trek-v1';
+const CACHE_NAME = 'the-trek-v2'; // Increment version
 const urlsToCache = [
   '/',
   '/index.html',
@@ -8,14 +8,22 @@ const urlsToCache = [
 
 // Install event - cache files
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        console.log('[SW] Caching app shell');
+        // Add individually to handle errors gracefully
+        return Promise.all(
+          urlsToCache.map(url => {
+            return cache.add(url).catch(err => {
+              console.warn(`[SW] Failed to cache ${url}:`, err);
+            });
+          })
+        );
       })
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 // Activate event - clean old caches

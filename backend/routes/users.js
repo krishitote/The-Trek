@@ -37,11 +37,24 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'users' 
-      AND column_name IN ('height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name')
+      AND column_name IN ('height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name', 'age')
     `);
     
     const existingColumns = columnsCheck.rows.map(r => r.column_name);
     console.log("📊 Existing columns:", existingColumns);
+
+    // Calculate age from date_of_birth if provided
+    let calculatedAge = null;
+    if (date_of_birth) {
+      const birthDate = new Date(date_of_birth);
+      const today = new Date();
+      calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+      }
+      console.log("🎂 Calculated age from DOB:", calculatedAge);
+    }
 
     // Build dynamic update query
     const updates = [];
@@ -63,6 +76,11 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
     if (existingColumns.includes('date_of_birth') && date_of_birth !== undefined) {
       updates.push(`date_of_birth = $${paramCount++}`);
       values.push(date_of_birth);
+    }
+    // Auto-update age if date_of_birth changed and age column exists
+    if (existingColumns.includes('age') && calculatedAge !== null) {
+      updates.push(`age = $${paramCount++}`);
+      values.push(calculatedAge);
     }
     if (existingColumns.includes('first_name') && first_name !== undefined) {
       updates.push(`first_name = $${paramCount++}`);

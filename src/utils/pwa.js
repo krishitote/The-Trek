@@ -46,31 +46,51 @@ export const unregisterServiceWorker = async () => {
  * Listen for install prompt
  */
 export const setupInstallPrompt = (callback) => {
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
+  const handleBeforeInstall = (e) => {
+    console.log('[PWA] beforeinstallprompt event fired');
+    // Don't prevent default - let browser handle it naturally
+    // Store the event for later use
     deferredPrompt = e;
     if (callback) callback(true);
-  });
+  };
 
-  window.addEventListener('appinstalled', () => {
+  const handleAppInstalled = () => {
+    console.log('[PWA] App installed successfully');
     deferredPrompt = null;
     if (callback) callback(false);
-  });
+  };
+
+  window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+  window.addEventListener('appinstalled', handleAppInstalled);
+
+  // Return cleanup function
+  return () => {
+    window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.removeEventListener('appinstalled', handleAppInstalled);
+  };
 };
 
 /**
- * Show install prompt
+ * Show install prompt manually
  */
 export const showInstallPrompt = async () => {
   if (!deferredPrompt) {
-    return { outcome: 'no-prompt' };
+    console.log('[PWA] No install prompt available');
+    return { outcome: 'no-prompt', error: 'Install prompt not available' };
   }
 
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  
-  return { outcome };
+  try {
+    console.log('[PWA] Showing install prompt');
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('[PWA] User choice:', outcome);
+    deferredPrompt = null;
+    
+    return { outcome };
+  } catch (error) {
+    console.error('[PWA] Error showing prompt:', error);
+    return { outcome: 'error', error: error.message };
+  }
 };
 
 /**
