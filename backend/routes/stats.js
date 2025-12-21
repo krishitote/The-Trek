@@ -201,4 +201,50 @@ router.post('/weekly-goal', authenticateToken, async (req, res) => {
   }
 });
 
+// Get calories burned stats
+router.get('/calories-burned', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const stats = await pool.query(`
+      SELECT 
+        -- Total calories all time
+        (SELECT COALESCE(SUM(calories_burned), 0) FROM activities WHERE user_id = $1) as total_calories,
+        
+        -- This week's calories
+        (SELECT COALESCE(SUM(calories_burned), 0) FROM activities 
+         WHERE user_id = $1 AND date >= DATE_TRUNC('week', CURRENT_DATE)) as weekly_calories,
+        
+        -- This month's calories
+        (SELECT COALESCE(SUM(calories_burned), 0) FROM activities 
+         WHERE user_id = $1 AND date >= DATE_TRUNC('month', CURRENT_DATE)) as monthly_calories,
+        
+        -- Today's calories
+        (SELECT COALESCE(SUM(calories_burned), 0) FROM activities 
+         WHERE user_id = $1 AND date = CURRENT_DATE) as today_calories,
+        
+        -- Average daily calories (last 30 days)
+        (SELECT COALESCE(AVG(daily_cals), 0) FROM (
+          SELECT SUM(calories_burned) as daily_cals
+          FROM activities
+          WHERE user_id = $1 AND date >= CURRENT_DATE - INTERVAL '30 days'
+          GROUP BY DATE(date)
+        ) as daily_totals) as avg_daily_calories,
+        
+        -- Highest calorie day
+        (SELECT COALESCE(MAX(daily_cals), 0) FROM (
+          SELECT SUM(calories_burned) as daily_cals
+          FROM activities
+          WHERE user_id = $1
+          GROUP BY DATE(date)
+        ) as daily_totals) as highest_daily_calories
+    `, [userId]);
+    
+    res.json(stats.rows[0]);
+  } catch (err) {
+    console.error('Calories stats fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch calories stats' });
+  }
+});
+
 export default router;

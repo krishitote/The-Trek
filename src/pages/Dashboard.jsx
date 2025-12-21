@@ -266,6 +266,14 @@ export default function Dashboard() {
                             {activity.duration_min} min
                           </Text>
                         </VStack>
+                        {activity.calories_burned && (
+                          <VStack spacing={0}>
+                            <Text fontSize="xs" color="gray.600">Calories</Text>
+                            <Text fontWeight="bold" fontSize="xl" color="orange.500">
+                              🔥 {activity.calories_burned}
+                            </Text>
+                          </VStack>
+                        )}
                       </HStack>
                     </HStack>
                   </Box>

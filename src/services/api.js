@@ -181,6 +181,11 @@ export async function apiSetWeeklyGoal(token, goal) {
   return handleResponse(res);
 }
 
+export async function apiGetCaloriesBurned(token) {
+  const res = await fetch(`${API_URL}/api/stats/calories-burned`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
 // ===================== BADGES =====================
 export async function apiGetAllBadges() {
   const res = await fetch(`${API_URL}/api/badges`);

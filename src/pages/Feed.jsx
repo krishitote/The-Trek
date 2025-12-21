@@ -212,6 +212,14 @@ export default function Feed() {
                     {(activity.duration_min / activity.distance_km).toFixed(1)} min/km
                   </Text>
                 </VStack>
+                {activity.calories_burned && (
+                  <VStack spacing={0}>
+                    <Text fontSize="xs" color="gray.600">Calories</Text>
+                    <Text fontWeight="bold" fontSize="2xl" color="red.500">
+                      🔥 {activity.calories_burned}
+                    </Text>
+                  </VStack>
+                )}
               </HStack>
 
               {/* Actions */}

@@ -49,6 +49,7 @@ import {
   apiGetActivityBreakdown,
   apiGetWeeklyGoal,
   apiSetWeeklyGoal,
+  apiGetCaloriesBurned,
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -78,6 +79,7 @@ export default function EnhancedStats() {
   const [activityBreakdown, setActivityBreakdown] = useState([]);
   const [weeklyGoal, setWeeklyGoal] = useState(null);
   const [newGoal, setNewGoal] = useState('');
+  const [caloriesStats, setCaloriesStats] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -87,18 +89,20 @@ export default function EnhancedStats() {
     if (!session?.accessToken) return;
     setLoading(true);
     try {
-      const [recordsData, weeklyData, monthlyData, breakdownData, goalData] = await Promise.all([
+      const [recordsData, weeklyData, monthlyData, breakdownData, goalData, caloriesData] = await Promise.all([
         apiGetPersonalRecords(session.accessToken),
         apiGetWeeklyProgress(session.accessToken),
         apiGetMonthlyProgress(session.accessToken),
         apiGetActivityBreakdown(session.accessToken),
         apiGetWeeklyGoal(session.accessToken),
+        apiGetCaloriesBurned(session.accessToken),
       ]);
       setRecords(recordsData);
       setWeeklyProgress(weeklyData);
       setMonthlyProgress(monthlyData);
       setActivityBreakdown(breakdownData);
       setWeeklyGoal(goalData);
+      setCaloriesStats(caloriesData);
     } catch (err) {
       console.error('Failed to load stats:', err);
       toast({
@@ -277,6 +281,50 @@ export default function EnhancedStats() {
               <Stat>
                 <StatLabel>Total Time</StatLabel>
                 <StatNumber>{(parseFloat(records.total_duration || 0) / 60).toFixed(1)} hrs</StatNumber>
+              </Stat>
+            </SimpleGrid>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Calories Burned Stats */}
+      {caloriesStats && (
+        <Card bg="gradient-to-br from-orange-50 to-red-50" borderLeft="4px solid" borderColor="orange.500">
+          <CardBody>
+            <Heading size="md" mb={4} color="orange.600">
+              🔥 Calories Burned
+            </Heading>
+            <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+              <Stat>
+                <StatLabel>Today</StatLabel>
+                <StatNumber color="red.600">{parseInt(caloriesStats.today_calories || 0).toLocaleString()}</StatNumber>
+                <StatHelpText>cal</StatHelpText>
+              </Stat>
+              <Stat>
+                <StatLabel>This Week</StatLabel>
+                <StatNumber color="orange.600">{parseInt(caloriesStats.weekly_calories || 0).toLocaleString()}</StatNumber>
+                <StatHelpText>cal</StatHelpText>
+              </Stat>
+              <Stat>
+                <StatLabel>This Month</StatLabel>
+                <StatNumber color="orange.700">{parseInt(caloriesStats.monthly_calories || 0).toLocaleString()}</StatNumber>
+                <StatHelpText>cal</StatHelpText>
+              </Stat>
+              <Stat>
+                <StatLabel>All Time</StatLabel>
+                <StatNumber color="red.700">{parseInt(caloriesStats.total_calories || 0).toLocaleString()}</StatNumber>
+                <StatHelpText>cal</StatHelpText>
+              </Stat>
+            </SimpleGrid>
+            <Divider my={4} />
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+              <Stat>
+                <StatLabel>Daily Average (30d)</StatLabel>
+                <StatNumber>{parseInt(caloriesStats.avg_daily_calories || 0).toLocaleString()} cal</StatNumber>
+              </Stat>
+              <Stat>
+                <StatLabel>Highest Single Day</StatLabel>
+                <StatNumber>{parseInt(caloriesStats.highest_daily_calories || 0).toLocaleString()} cal</StatNumber>
               </Stat>
             </SimpleGrid>
           </CardBody>

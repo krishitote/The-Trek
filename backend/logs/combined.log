@@ -811,3 +811,105 @@
 {"level":"info","message":"Environment: development","timestamp":"2025-12-20T22:42:55.365Z"}
 {"level":"info","message":"Database: Connected","timestamp":"2025-12-20T22:42:55.366Z"}
 {"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-20T22:42:55.367Z"}
+{"duration":"387ms","ip":"::1","level":"info","message":"HTTP Request","method":"POST","requestId":"1766270601956-oyyiqkyp9","status":200,"timestamp":"2025-12-20T22:43:22.343Z","url":"/login"}
+{"duration":"14ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602424-btob5fc1h","status":304,"timestamp":"2025-12-20T22:43:22.438Z","url":"/quick"}
+{"duration":"5ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602442-cbcvenxda","status":304,"timestamp":"2025-12-20T22:43:22.448Z","url":"/quick"}
+{"duration":"150ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602430-p38ok8axj","status":304,"timestamp":"2025-12-20T22:43:22.580Z","url":"/api/activities?user_id=2"}
+{"duration":"6ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602583-iz8z02u4l","status":304,"timestamp":"2025-12-20T22:43:22.590Z","url":"/api/activities?user_id=2"}
+{"duration":"36ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602648-1d0o0rf0m","status":304,"timestamp":"2025-12-20T22:43:22.686Z","url":"/personal-records","userId":2}
+{"duration":"9ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602692-h4ccvo8ot","status":304,"timestamp":"2025-12-20T22:43:22.701Z","url":"/personal-records","userId":2}
+{"duration":"183ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602657-cjit65bsy","status":304,"timestamp":"2025-12-20T22:43:22.840Z","url":"/weekly-progress","userId":2}
+{"duration":"10ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602844-thri10v5c","status":304,"timestamp":"2025-12-20T22:43:22.854Z","url":"/weekly-progress","userId":2}
+{"duration":"200ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602663-pmdefrjr3","status":304,"timestamp":"2025-12-20T22:43:22.863Z","url":"/monthly-progress","userId":2}
+{"duration":"11ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602866-j9usnjlsc","status":304,"timestamp":"2025-12-20T22:43:22.877Z","url":"/monthly-progress","userId":2}
+{"duration":"218ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602668-0ezp3kzux","status":304,"timestamp":"2025-12-20T22:43:22.887Z","url":"/activity-breakdown","userId":2}
+{"duration":"218ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602676-quzbh0va5","status":304,"timestamp":"2025-12-20T22:43:22.895Z","url":"/weekly-goal","userId":2}
+{"duration":"9ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602889-be8wvm3f1","status":304,"timestamp":"2025-12-20T22:43:22.898Z","url":"/activity-breakdown","userId":2}
+{"duration":"16ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270602900-1k2oj3mbb","status":304,"timestamp":"2025-12-20T22:43:22.916Z","url":"/weekly-goal","userId":2}
+{"duration":"25ms","ip":"::1","level":"warn","message":"HTTP Request","method":"GET","requestId":"1766270606151-p2bebmu0m","status":500,"timestamp":"2025-12-20T22:43:26.177Z","url":"/feed?limit=50&offset=0","userId":2}
+{"duration":"11ms","ip":"::1","level":"warn","message":"HTTP Request","method":"GET","requestId":"1766270606182-4sanrrntt","status":500,"timestamp":"2025-12-20T22:43:26.193Z","url":"/feed?limit=50&offset=0","userId":2}
+{"duration":"26ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270612965-ak4zfhr2j","status":200,"timestamp":"2025-12-20T22:43:32.991Z","url":"/progress","userId":2}
+{"duration":"11ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270612994-d043hw2xr","status":304,"timestamp":"2025-12-20T22:43:33.006Z","url":"/progress","userId":2}
+{"duration":"10ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270619888-bpdvlri9k","status":304,"timestamp":"2025-12-20T22:43:39.898Z","url":"/quick"}
+{"duration":"5ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270619901-uti21h1td","status":304,"timestamp":"2025-12-20T22:43:39.906Z","url":"/quick"}
+{"duration":"114ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270619890-sb9610lv9","status":304,"timestamp":"2025-12-20T22:43:40.004Z","url":"/api/activities?user_id=2"}
+{"duration":"5ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620007-bq3mg3svh","status":304,"timestamp":"2025-12-20T22:43:40.012Z","url":"/api/activities?user_id=2"}
+{"duration":"24ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620067-f30wqdq42","status":304,"timestamp":"2025-12-20T22:43:40.092Z","url":"/personal-records","userId":2}
+{"duration":"21ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620079-kzvqmnekd","status":304,"timestamp":"2025-12-20T22:43:40.101Z","url":"/weekly-progress","userId":2}
+{"duration":"21ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620083-qqcvyf26h","status":304,"timestamp":"2025-12-20T22:43:40.104Z","url":"/monthly-progress","userId":2}
+{"duration":"32ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620095-uffd6zvpb","status":304,"timestamp":"2025-12-20T22:43:40.127Z","url":"/weekly-goal","userId":2}
+{"duration":"23ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620109-4s1ns5ezz","status":304,"timestamp":"2025-12-20T22:43:40.132Z","url":"/personal-records","userId":2}
+{"duration":"22ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620113-n73dr4jv7","status":304,"timestamp":"2025-12-20T22:43:40.135Z","url":"/weekly-progress","userId":2}
+{"duration":"14ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620138-5566xxgg7","status":304,"timestamp":"2025-12-20T22:43:40.152Z","url":"/weekly-goal","userId":2}
+{"duration":"153ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620087-ittyccbvm","status":304,"timestamp":"2025-12-20T22:43:40.240Z","url":"/activity-breakdown","userId":2}
+{"duration":"4ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620246-bgjl5wgaz","status":304,"timestamp":"2025-12-20T22:43:40.251Z","url":"/activity-breakdown","userId":2}
+{"duration":"139ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270620118-uuhpb72x3","status":304,"timestamp":"2025-12-20T22:43:40.257Z","url":"/monthly-progress","userId":2}
+{"duration":"15ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270622881-t9afjwwls","status":200,"timestamp":"2025-12-20T22:43:42.896Z","url":"/"}
+{"duration":"12ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270622886-no9otgcy6","status":200,"timestamp":"2025-12-20T22:43:42.899Z","url":"/current"}
+{"duration":"6ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270622901-uqrjptn3x","status":304,"timestamp":"2025-12-20T22:43:42.907Z","url":"/"}
+{"duration":"12ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270622904-z52xwxalg","status":304,"timestamp":"2025-12-20T22:43:42.916Z","url":"/current"}
+{"duration":"6ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270629996-6kbg8rsg6","status":304,"timestamp":"2025-12-20T22:43:50.002Z","url":"/"}
+{"duration":"3ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270630006-rtnp97me6","status":304,"timestamp":"2025-12-20T22:43:50.010Z","url":"/"}
+{"duration":"14ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270629999-fmmqk4120","status":304,"timestamp":"2025-12-20T22:43:50.013Z","url":"/current"}
+{"duration":"6ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270630015-4fobjl4hu","status":304,"timestamp":"2025-12-20T22:43:50.022Z","url":"/current"}
+{"duration":"9ms","ip":"::1","level":"warn","message":"HTTP Request","method":"GET","requestId":"1766270636143-y227lm5ka","status":500,"timestamp":"2025-12-20T22:43:56.153Z","url":"/feed?limit=50&offset=0","userId":2}
+{"duration":"8ms","ip":"::1","level":"warn","message":"HTTP Request","method":"GET","requestId":"1766270636157-illr9g4be","status":500,"timestamp":"2025-12-20T22:43:56.166Z","url":"/feed?limit=50&offset=0","userId":2}
+{"duration":"23ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270638621-jd6l3b7zm","status":304,"timestamp":"2025-12-20T22:43:58.644Z","url":"/progress","userId":2}
+{"duration":"10ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270638648-jg0y5k4pb","status":304,"timestamp":"2025-12-20T22:43:58.659Z","url":"/progress","userId":2}
+{"duration":"10ms","ip":"::1","level":"info","message":"HTTP Request","method":"POST","requestId":"1766270643220-cqma1nowx","status":200,"timestamp":"2025-12-20T22:44:03.230Z","url":"/logout"}
+{"duration":"7ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270644920-prjuic12b","status":304,"timestamp":"2025-12-20T22:44:04.927Z","url":"/"}
+{"duration":"5ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270644931-t012d1tqx","status":304,"timestamp":"2025-12-20T22:44:04.936Z","url":"/"}
+{"duration":"138ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270644924-5g7z6jcpm","status":304,"timestamp":"2025-12-20T22:44:05.062Z","url":"/current"}
+{"duration":"4ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766270645066-mu96rsltf","status":304,"timestamp":"2025-12-20T22:44:05.071Z","url":"/current"}
+{"duration":"178ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766310770961-a9m8x52kv","status":200,"timestamp":"2025-12-21T09:52:51.140Z","url":"/current"}
+{"duration":"4ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766310771141-dafmauxax","status":304,"timestamp":"2025-12-21T09:52:51.145Z","url":"/current"}
+{"duration":"238ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766310770953-un71bb2x6","status":200,"timestamp":"2025-12-21T09:52:51.191Z","url":"/"}
+{"duration":"14ms","ip":"::1","level":"info","message":"HTTP Request","method":"GET","requestId":"1766310771193-vq2y7etqq","status":304,"timestamp":"2025-12-21T09:52:51.208Z","url":"/"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T10:40:18.503Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T10:40:18.505Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T10:40:18.505Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T10:40:18.505Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T10:42:25.688Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T10:42:25.690Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T10:42:25.690Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T10:42:25.690Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T10:42:32.894Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T10:42:32.896Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T10:42:32.896Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T10:42:32.897Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T10:44:41.105Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T10:44:41.107Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T10:44:41.107Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T10:44:41.107Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T10:44:44.206Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T10:44:44.208Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T10:44:44.208Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T10:44:44.208Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:07:05.663Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:07:05.665Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:07:05.665Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:07:05.666Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:07:06.706Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:07:06.708Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:07:06.708Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:07:06.709Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:07:08.485Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:07:08.488Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:07:08.488Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:07:08.489Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:07:25.765Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:07:25.767Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:07:25.768Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:07:25.768Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:07:43.547Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:07:43.551Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:07:43.551Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:07:43.552Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:07:52.298Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:07:52.300Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:07:52.301Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:07:52.301Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:08:07.068Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:08:07.072Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:08:07.072Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:08:07.073Z"}

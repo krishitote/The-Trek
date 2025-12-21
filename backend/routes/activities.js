@@ -6,6 +6,7 @@ import { validateActivity } from '../middleware/validation.js';
 import { activityLimiter } from '../middleware/rateLimiter.js';
 import { invalidateCache } from '../middleware/cache.js';
 import { checkAndAwardBadges } from './badges.js';
+import { calculateCalories } from '../utils/calorieCalculator.js';
 
 const router = express.Router();
 
@@ -15,11 +16,21 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
     const { type, distance_km, duration_min, date } = req.body;
     const userId = req.user.id; // ✅ from token
 
+    // Get user's weight for calorie calculation
+    const userResult = await pool.query(
+      'SELECT weight FROM users WHERE id = $1',
+      [userId]
+    );
+    const userWeight = userResult.rows[0]?.weight || 70; // Default 70kg if not set
+
+    // Calculate calories burned
+    const caloriesBurned = calculateCalories(type, distance_km, duration_min, userWeight);
+
     const result = await pool.query(
-      `INSERT INTO activities (user_id, type, distance_km, duration_min, date)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO activities (user_id, type, distance_km, duration_min, date, calories_burned)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [userId, type, distance_km, duration_min, date || new Date()]
+      [userId, type, distance_km, duration_min, date || new Date(), caloriesBurned]
     );
 
     const activity = result.rows[0];

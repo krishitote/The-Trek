@@ -43,3 +43,6 @@ backend/uploads/*
 # --- Optional: If you have uploads outside backend ---
 uploads/*
 !uploads/.gitkeep
+
+# Local Netlify folder
+.netlify
