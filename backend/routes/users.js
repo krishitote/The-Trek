@@ -37,7 +37,7 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'users' 
-      AND column_name IN ('height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name', 'age')
+      AND column_name IN ('height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name', 'age', 'profile_image', 'is_admin')
     `);
     
     const existingColumns = columnsCheck.rows.map(r => r.column_name);
@@ -96,11 +96,31 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
     }
 
     values.push(id);
+    
+    // Build RETURNING clause with only existing columns
+    const returningColumns = ['id', 'username', 'email'];
+    const updateableColumns = ['height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name', 'age'];
+    const additionalColumns = ['profile_image', 'is_admin'];
+    
+    // Add updateable columns that exist
+    updateableColumns.forEach(col => {
+      if (existingColumns.includes(col)) {
+        returningColumns.push(col);
+      }
+    });
+    
+    // Add additional columns that exist
+    additionalColumns.forEach(col => {
+      if (existingColumns.includes(col)) {
+        returningColumns.push(col);
+      }
+    });
+    
     const query = `
       UPDATE users
       SET ${updates.join(', ')}
       WHERE id = $${paramCount}
-      RETURNING id, username, email, ${existingColumns.join(', ')}, profile_image, is_admin
+      RETURNING ${returningColumns.join(', ')}
     `;
 
     console.log("🔧 Update query:", query);
