@@ -30,7 +30,7 @@ router.post("/register", authLimiter, validateRegistration, async (req, res) => 
     const result = await pool.query(
       `INSERT INTO users (username, email, password)
        VALUES ($1, $2, $3)
-       RETURNING id, username, email`,
+       RETURNING id, username, email, is_admin`,
       [username, email, hashedPassword]
     );
 
@@ -105,7 +105,8 @@ router.post("/login", authLimiter, validateLogin, async (req, res) => {
         age: user.age,
         weight: user.weight,
         height: user.height,
-        profile_image: user.profile_image
+        profile_image: user.profile_image,
+        is_admin: user.is_admin || false
       }
     });
   } catch (err) {
