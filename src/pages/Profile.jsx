@@ -35,6 +35,8 @@ export default function Profile() {
   const [dateOfBirth, setDateOfBirth] = useState(user?.date_of_birth ? user.date_of_birth.split('T')[0] : "");
   const [weight, setWeight] = useState(user?.weight || "");
   const [height, setHeight] = useState(user?.height || "");
+  const [firstName, setFirstName] = useState(user?.first_name || "");
+  const [lastName, setLastName] = useState(user?.last_name || "");
   
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,6 +56,19 @@ export default function Profile() {
         .catch(err => console.error('Failed to load badges:', err));
     }
   }, [session?.accessToken]);
+
+  // Calculate age from date of birth
+  const calculateAge = (dob) => {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   // Calculate BMI
   const calculateBMI = (w, h) => {
@@ -97,6 +112,8 @@ export default function Profile() {
         date_of_birth: dateOfBirth,
         weight: weight ? Number(weight) : null,
         height: height ? Number(height) : null,
+        first_name: firstName || null,
+        last_name: lastName || null,
       };
       
       const res = await fetch(
@@ -314,6 +331,40 @@ export default function Profile() {
           </Heading>
           
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+            <FormControl>
+              <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>First Name</FormLabel>
+              {editing ? (
+                <Input 
+                  value={firstName} 
+                  onChange={(e) => setFirstName(e.target.value)}
+                  size="lg"
+                  focusBorderColor="brand.500"
+                  placeholder="Enter first name"
+                />
+              ) : (
+                <Text fontSize="xl" fontWeight="bold" color="brand.500">
+                  {firstName || "Not set"}
+                </Text>
+              )}
+            </FormControl>
+
+            <FormControl>
+              <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>Last Name</FormLabel>
+              {editing ? (
+                <Input 
+                  value={lastName} 
+                  onChange={(e) => setLastName(e.target.value)}
+                  size="lg"
+                  focusBorderColor="brand.500"
+                  placeholder="Enter last name"
+                />
+              ) : (
+                <Text fontSize="xl" fontWeight="bold" color="brand.500">
+                  {lastName || "Not set"}
+                </Text>
+              )}
+            </FormControl>
+
             <FormControl isRequired>
               <FormLabel fontWeight="bold" color="brand.500" fontSize={{ base: "md", md: "lg" }}>Gender</FormLabel>
               {editing ? (
@@ -483,7 +534,9 @@ export default function Profile() {
             </Box>
             <Box>
               <Text fontSize="sm" color="gray.600">Age</Text>
-              <Text fontWeight="bold">{user.age || "N/A"} years</Text>
+              <Text fontWeight="bold">
+                {calculateAge(user.date_of_birth) || "N/A"} {calculateAge(user.date_of_birth) && "years"}
+              </Text>
             </Box>
           </SimpleGrid>
         </Box>
