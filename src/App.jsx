@@ -21,6 +21,7 @@ import Communities from "./pages/Communities";
 import Championship from "./pages/Championship";
 import Badges from "./pages/Badges";
 import Feed from "./pages/Feed";
+import AdminDashboard from "./pages/AdminDashboard";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -74,6 +75,11 @@ function App() {
               <Button as={Link} to="/badges" colorScheme="gray" size="sm">
                 🏆 Badges
               </Button>
+              {user.is_admin && (
+                <Button as={Link} to="/admin" colorScheme="red" size="sm">
+                  🔒 Admin
+                </Button>
+              )}
               <Button as={Link} to="/profile" colorScheme="gray" variant="solid" size="sm">
                 {user.username}
               </Button>
@@ -109,6 +115,7 @@ function App() {
           <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" replace />} />
           <Route path="/feed" element={user ? <Feed /> : <Navigate to="/login" replace />} />
           <Route path="/badges" element={user ? <Badges /> : <Navigate to="/login" replace />} />
+          <Route path="/admin" element={user ? <AdminDashboard /> : <Navigate to="/login" replace />} />
           <Route path="/communities" element={user ? <Communities /> : <Navigate to="/login" replace />} />
           <Route path="/championship" element={user ? <Championship /> : <Navigate to="/login" replace />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />

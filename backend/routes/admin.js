@@ -11,6 +11,126 @@ const router = express.Router();
 router.use(authenticateToken);
 router.use(requireAdmin);
 
+// ==================== PLATFORM ANALYTICS ====================
+
+// Get platform-wide statistics
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = await pool.query(`
+      SELECT 
+        -- User stats
+        (SELECT COUNT(*) FROM users) as total_users,
+        (SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days') as new_users_30d,
+        (SELECT COUNT(*) FROM users WHERE is_admin = true) as admin_count,
+        (SELECT COUNT(DISTINCT user_id) FROM activities WHERE date >= CURRENT_DATE - INTERVAL '30 days') as active_users_30d,
+        (SELECT COUNT(DISTINCT user_id) FROM activities WHERE date >= CURRENT_DATE - INTERVAL '7 days') as active_users_7d,
+        
+        -- Activity stats
+        (SELECT COUNT(*) FROM activities) as total_activities,
+        (SELECT COUNT(*) FROM activities WHERE date >= CURRENT_DATE - INTERVAL '30 days') as activities_30d,
+        (SELECT COUNT(*) FROM activities WHERE date >= CURRENT_DATE - INTERVAL '7 days') as activities_7d,
+        (SELECT COALESCE(SUM(distance_km), 0) FROM activities) as total_distance,
+        (SELECT COALESCE(SUM(distance_km), 0) FROM activities WHERE date >= CURRENT_DATE - INTERVAL '30 days') as distance_30d,
+        (SELECT COALESCE(SUM(calories_burned), 0) FROM activities) as total_calories,
+        (SELECT COALESCE(SUM(calories_burned), 0) FROM activities WHERE date >= CURRENT_DATE - INTERVAL '30 days') as calories_30d,
+        
+        -- Engagement stats
+        (SELECT COUNT(*) FROM badges) as total_badges,
+        (SELECT COUNT(*) FROM user_badges) as badges_earned,
+        (SELECT COUNT(*) FROM follows) as total_follows,
+        (SELECT COUNT(*) FROM activity_likes) as total_likes,
+        (SELECT COUNT(*) FROM activity_comments) as total_comments,
+        
+        -- Community stats
+        (SELECT COUNT(*) FROM communities) as total_communities,
+        (SELECT COUNT(*) FROM community_members) as total_community_members,
+        (SELECT COUNT(*) FROM championships) as total_championships,
+        (SELECT COUNT(*) FROM championships WHERE is_active = true) as active_championships
+    `);
+    
+    res.json(stats.rows[0]);
+  } catch (err) {
+    console.error('Admin stats fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch platform stats' });
+  }
+});
+
+// Get user growth data (last 12 months)
+router.get('/stats/user-growth', async (req, res) => {
+  try {
+    const growth = await pool.query(`
+      SELECT 
+        DATE_TRUNC('month', created_at) as month,
+        COUNT(*) as new_users,
+        SUM(COUNT(*)) OVER (ORDER BY DATE_TRUNC('month', created_at)) as cumulative_users
+      FROM users
+      WHERE created_at >= NOW() - INTERVAL '12 months'
+      GROUP BY DATE_TRUNC('month', created_at)
+      ORDER BY month ASC
+    `);
+    
+    res.json(growth.rows);
+  } catch (err) {
+    console.error('User growth fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch user growth data' });
+  }
+});
+
+// Get activity trends (last 30 days)
+router.get('/stats/activity-trends', async (req, res) => {
+  try {
+    const trends = await pool.query(`
+      SELECT 
+        DATE(date) as day,
+        COUNT(*) as activity_count,
+        COUNT(DISTINCT user_id) as unique_users,
+        SUM(distance_km) as total_distance,
+        SUM(calories_burned) as total_calories
+      FROM activities
+      WHERE date >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY DATE(date)
+      ORDER BY day ASC
+    `);
+    
+    res.json(trends.rows);
+  } catch (err) {
+    console.error('Activity trends fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch activity trends' });
+  }
+});
+
+// Get top users by activity count
+router.get('/stats/top-users', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const topUsers = await pool.query(`
+      SELECT 
+        u.id,
+        u.username,
+        u.email,
+        u.first_name,
+        u.last_name,
+        COUNT(a.id) as activity_count,
+        COALESCE(SUM(a.distance_km), 0) as total_distance,
+        COALESCE(SUM(a.calories_burned), 0) as total_calories,
+        u.badge_count,
+        u.follower_count,
+        u.following_count
+      FROM users u
+      LEFT JOIN activities a ON u.id = a.user_id
+      GROUP BY u.id
+      ORDER BY activity_count DESC
+      LIMIT $1
+    `, [limit]);
+    
+    res.json(topUsers.rows);
+  } catch (err) {
+    console.error('Top users fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch top users' });
+  }
+});
+
 // ==================== COMMUNITY MANAGEMENT ====================
 
 // Get all communities (including unapproved)

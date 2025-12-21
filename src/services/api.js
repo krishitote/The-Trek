@@ -276,6 +276,75 @@ export async function apiGetFeed(token, limit = 20, offset = 0) {
   return handleResponse(res);
 }
 
+// ===================== ADMIN =====================
+export async function apiGetAdminStats(token) {
+  const res = await fetch(`${API_URL}/api/admin/stats`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiGetUserGrowth(token) {
+  const res = await fetch(`${API_URL}/api/admin/stats/user-growth`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiGetActivityTrends(token) {
+  const res = await fetch(`${API_URL}/api/admin/stats/activity-trends`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiGetTopUsers(token, limit = 10) {
+  const res = await fetch(`${API_URL}/api/admin/stats/top-users?limit=${limit}`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiGetAdminUsers(token, page = 1, limit = 20, search = '', isAdmin = null) {
+  let url = `${API_URL}/api/admin/users?page=${page}&limit=${limit}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
+  if (isAdmin !== null) url += `&is_admin=${isAdmin}`;
+  const res = await fetch(url, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiMakeUserAdmin(token, userId) {
+  const res = await fetch(`${API_URL}/api/admin/users/${userId}/make-admin`, { method: 'POST', headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiRemoveUserAdmin(token, userId) {
+  const res = await fetch(`${API_URL}/api/admin/users/${userId}/remove-admin`, { method: 'POST', headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiDeleteUser(token, userId) {
+  const res = await fetch(`${API_URL}/api/admin/users/${userId}`, { method: 'DELETE', headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiGetAdminCommunities(token) {
+  const res = await fetch(`${API_URL}/api/admin/communities`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiGetAdminChampionships(token) {
+  const res = await fetch(`${API_URL}/api/admin/championships`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiCreateChampionship(token, data) {
+  const res = await fetch(`${API_URL}/api/admin/championships`, { method: 'POST', headers: authHeaders(token), body: JSON.stringify(data) });
+  return handleResponse(res);
+}
+
+export async function apiUpdateChampionship(token, id, data) {
+  const res = await fetch(`${API_URL}/api/admin/championships/${id}`, { method: 'PUT', headers: authHeaders(token), body: JSON.stringify(data) });
+  return handleResponse(res);
+}
+
+export async function apiDeleteChampionship(token, id) {
+  const res = await fetch(`${API_URL}/api/admin/championships/${id}`, { method: 'DELETE', headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
 export async function apiGetPublicFeed(limit = 20, offset = 0) {
   const res = await fetch(`${API_URL}/api/social/feed/public?limit=${limit}&offset=${offset}`);
   return handleResponse(res);
