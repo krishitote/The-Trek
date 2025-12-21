@@ -22,6 +22,7 @@ import Championship from "./pages/Championship";
 import Badges from "./pages/Badges";
 import Feed from "./pages/Feed";
 import AdminDashboard from "./pages/AdminDashboard";
+import InstallPWA from "./components/InstallPWA";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -98,6 +99,7 @@ function App() {
             </>
           )}
 
+          <InstallPWA variant="icon" size="sm" colorScheme="green" />
           <IconButton
             aria-label="Toggle color mode"
             icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
