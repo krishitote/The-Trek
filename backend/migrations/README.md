@@ -28,6 +28,32 @@ node test-db.mjs
 ## Migration Files
 
 ### 001_add_refresh_tokens.sql
+- Adds `refresh_token` and `refresh_token_expires` columns to users table
+- Required for JWT refresh token rotation
+
+### 002_add_date_of_birth.sql
+- Adds `date_of_birth` column to users table (historical)
+- Note: Superseded by migration 010
+
+### 010_add_date_of_birth.sql ⚠️ **REQUIRED**
+- Drops unused `age` column
+- Adds `date_of_birth DATE` column (required by Profile.jsx)
+- Fixes profile editing functionality
+- **Status: Must run in production**
+
+### 011_add_created_at_to_users.sql ⚠️ **REQUIRED**
+- Adds `created_at` timestamp to users table
+- Enables real user growth analytics in admin dashboard
+- Backfills existing users with current timestamp
+- **Status: Must run in production**
+
+## ⚠️ Action Required
+
+Run these migrations in Neon SQL Editor:
+1. **010_add_date_of_birth.sql** - Fixes profile editing
+2. **011_add_created_at_to_users.sql** - Enables admin analytics
+
+See SCHEMA_ANALYSIS.md for full database schema review.
 - **Date:** 2025-11-24
 - **Description:** Adds refresh token support for JWT authentication
 - **Changes:**
