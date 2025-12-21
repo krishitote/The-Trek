@@ -360,8 +360,8 @@ export default function AdminDashboard() {
                     <CardBody>
                       <Stat>
                         <StatLabel>Engagement</StatLabel>
-                        <StatNumber>{stats.total_likes + stats.total_comments}</StatNumber>
-                        <StatHelpText>{stats.total_likes} likes, {stats.total_comments} comments</StatHelpText>
+                        <StatNumber>{stats.badges_earned || 0}</StatNumber>
+                        <StatHelpText>{stats.badges_earned || 0} badges earned</StatHelpText>
                       </Stat>
                     </CardBody>
                   </Card>
