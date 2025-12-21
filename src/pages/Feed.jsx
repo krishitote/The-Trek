@@ -18,6 +18,7 @@ import {
   Divider,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
+import ShareButton from '../components/ShareButton';
 import {
   apiGetFeed,
   apiLikeActivity,
@@ -242,6 +243,13 @@ export default function Feed() {
                 >
                   {activity.comment_count || 0}
                 </Button>
+                <ShareButton 
+                  type="activity" 
+                  data={activity} 
+                  variant="icon" 
+                  size="sm" 
+                  colorScheme="green" 
+                />
               </HStack>
 
               {/* Comments Section */}

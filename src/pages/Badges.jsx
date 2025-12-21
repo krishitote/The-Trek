@@ -20,6 +20,7 @@ import {
   Icon,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
+import ShareButton from '../components/ShareButton';
 import { apiGetBadgeProgress } from '../services/api';
 
 export default function Badges() {
@@ -133,9 +134,18 @@ export default function Badges() {
 
         {/* Earned Date */}
         {badge.earned && badge.earned_at && (
-          <Text fontSize="xs" color="gray.500">
-            🏆 Earned {new Date(badge.earned_at).toLocaleDateString()}
-          </Text>
+          <VStack spacing={2} width="100%">
+            <Text fontSize="xs" color="gray.500">
+              🏆 Earned {new Date(badge.earned_at).toLocaleDateString()}
+            </Text>
+            <ShareButton 
+              type="badge" 
+              data={badge} 
+              variant="button" 
+              size="sm" 
+              colorScheme="orange" 
+            />
+          </VStack>
         )}
       </VStack>
 

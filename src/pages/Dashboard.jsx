@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import ActivityForm from "../components/ActivityForm";
 import ProgressChart from "../components/ProgressChart";
 import EnhancedStats from "../components/EnhancedStats";
+import ShareButton from "../components/ShareButton";
 import { apiActivities, apiQuickLeaderboard } from "../services/api";
 import {
   Box,
@@ -253,7 +254,7 @@ export default function Dashboard() {
                         </VStack>
                       </HStack>
 
-                      <HStack spacing={6}>
+                      <HStack spacing={6} flexWrap="wrap">
                         <VStack spacing={0}>
                           <Text fontSize="xs" color="gray.600">Distance</Text>
                           <Text fontWeight="bold" fontSize="xl" color="brand.500">
@@ -274,6 +275,13 @@ export default function Dashboard() {
                             </Text>
                           </VStack>
                         )}
+                        <ShareButton 
+                          type="activity" 
+                          data={activity} 
+                          variant="icon" 
+                          size="sm" 
+                          colorScheme="green" 
+                        />
                       </HStack>
                     </HStack>
                   </Box>

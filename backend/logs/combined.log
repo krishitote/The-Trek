@@ -917,3 +917,199 @@
 {"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:36:56.646Z"}
 {"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:36:56.646Z"}
 {"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:36:56.647Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:40:57.853Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:40:57.855Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:40:57.856Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:40:57.856Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:49:19.888Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:49:19.890Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:49:19.891Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:49:19.891Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:49:26.953Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:49:26.955Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:49:26.956Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:49:26.956Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:49:31.881Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:49:31.883Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:49:31.883Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:49:31.884Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:49:45.348Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:49:45.350Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:49:45.350Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:49:45.351Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:49:53.619Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:49:53.621Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:49:53.621Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:49:53.621Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:50:01.081Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:50:01.082Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:50:01.083Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:50:01.083Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:50:17.122Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:50:17.124Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:50:17.124Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:50:17.125Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:50:25.264Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:50:25.266Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:50:25.266Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:50:25.267Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:51:41.951Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:51:41.953Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:51:41.953Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:51:41.953Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:53:18.652Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:53:18.654Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:53:18.654Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:53:18.655Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:53:26.130Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:53:26.132Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:53:26.132Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:53:26.133Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:53:33.594Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:53:33.596Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:53:33.596Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:53:33.597Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:53:41.625Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:53:41.627Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:53:41.627Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:53:41.628Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:54:20.680Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:54:20.682Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:54:20.682Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:54:20.682Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:59:18.407Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:59:18.409Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:59:18.409Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:59:18.410Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:59:26.397Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:59:26.399Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:59:26.399Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:59:26.400Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:59:36.040Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:59:36.042Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:59:36.042Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:59:36.043Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:59:44.709Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:59:44.711Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:59:44.711Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:59:44.711Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T11:59:54.914Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T11:59:54.918Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T11:59:54.918Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T11:59:54.919Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:00:05.971Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:00:05.973Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:00:05.973Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:00:05.973Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:00:32.400Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:00:32.402Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:00:32.403Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:00:32.403Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:00:40.370Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:00:40.372Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:00:40.372Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:00:40.372Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:04:09.077Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:04:09.079Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:04:09.080Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:04:09.080Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:04:17.838Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:04:17.840Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:04:17.840Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:04:17.841Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:04:26.884Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:04:26.887Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:04:26.888Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:04:26.888Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:04:44.721Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:04:44.722Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:04:44.723Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:04:44.723Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:04:54.224Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:04:54.226Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:04:54.226Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:04:54.227Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:05:05.523Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:05:05.525Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:05:05.525Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:05:05.525Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:09:38.501Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:09:38.503Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:09:38.504Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:09:38.504Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:09:46.876Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:09:46.878Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:09:46.879Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:09:46.879Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T12:11:35.738Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T12:11:35.740Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T12:11:35.740Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T12:11:35.741Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:11:53.174Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:11:53.176Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:11:53.176Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:11:53.177Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:12:01.419Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:12:01.421Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:12:01.421Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:12:01.421Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:12:08.913Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:12:08.915Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:12:08.916Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:12:08.916Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:15:39.820Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:15:39.822Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:15:39.822Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:15:39.822Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:15:48.945Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:15:48.947Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:15:48.948Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:15:48.948Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:16:31.694Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:16:31.696Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:16:31.696Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:16:31.697Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:21:51.469Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:21:51.472Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:21:51.473Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:21:51.473Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:21:59.960Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:21:59.962Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:21:59.962Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:21:59.962Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:22:07.666Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:22:07.668Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:22:07.668Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:22:07.668Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:28:26.022Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:28:26.024Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:28:26.025Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:28:26.025Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:28:34.294Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:28:34.296Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:28:34.296Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:28:34.296Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:28:45.950Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:28:45.953Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:28:45.954Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:28:45.954Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:29:23.787Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:29:23.789Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:29:23.789Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:29:23.790Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:34:06.490Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:34:06.493Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:34:06.494Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:34:06.494Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:34:21.593Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:34:21.595Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:34:21.595Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:34:21.596Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:34:27.395Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:34:27.397Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:34:27.397Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:34:27.397Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-21T14:34:36.034Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-21T14:34:36.036Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-21T14:34:36.037Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T14:34:36.037Z"}
