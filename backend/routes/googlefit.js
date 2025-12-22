@@ -54,8 +54,10 @@ router.get("/callback", async (req, res) => {
   console.log('Google Fit callback received:', { 
     hasCode: !!code, 
     hasState: !!state, 
+    state: state,
     error,
-    allParams: Object.keys(req.query)
+    allParams: Object.keys(req.query),
+    fullQuery: req.query
   });
   
   if (error) {
@@ -67,14 +69,33 @@ router.get("/callback", async (req, res) => {
     return res.status(400).send("<h2>❌ Missing authorization code</h2><p>Please try connecting again.</p>");
   }
   
+  let userId;
+  
   if (!state) {
-    return res.status(400).send(`
+    console.warn('No state parameter received from Google - using fallback');
+    
+    // TEMPORARY WORKAROUND: If no state, show a page that posts message to parent
+    // This allows the frontend to handle the connection with the user's session
+    return res.send(`
       <html>
-        <body style="font-family: Arial; padding: 50px; text-align: center;">
-          <h2>❌ Missing state parameter</h2>
-          <p>Google did not return the state parameter. This might be a configuration issue.</p>
-          <p>Please contact support with this error.</p>
-          <button onclick="window.close()">Close Window</button>
+        <head><title>Google Fit Authorization</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h2>⏳ Completing authorization...</h2>
+          <p>Please wait while we complete the connection.</p>
+          <script>
+            // Post the code back to the parent window
+            if (window.opener) {
+              window.opener.postMessage({
+                type: 'GOOGLE_FIT_AUTH',
+                code: '${code}'
+              }, '${process.env.GOOGLE_REDIRECT_URI.includes('localhost') ? 'http://localhost:5173' : 'https://trekfit.co.ke'}');
+              setTimeout(() => {
+                window.close();
+              }, 1000);
+            } else {
+              document.body.innerHTML = '<h2>❌ Error</h2><p>Unable to communicate with parent window. Please close this window and try again.</p>';
+            }
+          </script>
         </body>
       </html>
     `);
@@ -84,18 +105,20 @@ router.get("/callback", async (req, res) => {
   const authData = pendingAuths.get(state);
   
   if (!authData) {
+    console.error('State not found in pendingAuths map:', state);
     return res.status(400).send(`
       <html>
         <body style="font-family: Arial; padding: 50px; text-align: center;">
           <h2>❌ Invalid or expired state token</h2>
           <p>Your authorization session may have expired. Please try connecting again.</p>
+          <p><small>State received: ${state}</small></p>
           <button onclick="window.close()">Close Window</button>
         </body>
       </html>
     `);
   }
   
-  const userId = authData.userId;
+  userId = authData.userId;
   pendingAuths.delete(state); // Clean up used state
   
   console.log('Retrieved user ID from state:', userId);
@@ -142,7 +165,52 @@ router.get("/callback", async (req, res) => {
   }
 });
 
-// Step 3: Check connection status
+// Step 3b: Exchange code for tokens (fallback when state not working)
+router.post("/exchange-code", authenticateToken, async (req, res) => {
+  const { code } = req.body;
+  const userId = req.user.id;
+  
+  console.log('Exchanging code for user:', userId);
+  
+  if (!code) {
+    return res.status(400).json({ error: "Missing authorization code" });
+  }
+  
+  try {
+    // Exchange authorization code for tokens
+    const tokenRes = await axios.post("https://oauth2.googleapis.com/token", {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: "authorization_code",
+    });
+
+    const { access_token, refresh_token, expires_in } = tokenRes.data;
+    const expiresAt = new Date(Date.now() + expires_in * 1000);
+
+    // Store tokens in database
+    await pool.query(
+      `INSERT INTO google_fit_tokens (user_id, access_token, refresh_token, token_expires_at, updated_at)
+       VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+       ON CONFLICT (user_id) 
+       DO UPDATE SET 
+         access_token = EXCLUDED.access_token,
+         refresh_token = COALESCE(EXCLUDED.refresh_token, google_fit_tokens.refresh_token),
+         token_expires_at = EXCLUDED.token_expires_at,
+         updated_at = CURRENT_TIMESTAMP`,
+      [userId, access_token, refresh_token, expiresAt]
+    );
+
+    console.log('✅ Google Fit tokens stored for user:', userId);
+    res.json({ success: true, message: "Google Fit connected successfully" });
+  } catch (err) {
+    console.error("❌ Token exchange failed:", err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to exchange authorization code" });
+  }
+});
+
+// Step 4: Check connection status
 router.get("/status", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(

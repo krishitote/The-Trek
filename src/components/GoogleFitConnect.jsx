@@ -68,6 +68,56 @@ export default function GoogleFitConnect() {
       const data = await res.json();
       console.log('Auth URL received:', data.authUrl); // Debug log
       
+      // Listen for postMessage from popup (fallback for missing state parameter)
+      const messageHandler = async (event) => {
+        // Verify origin
+        if (event.origin !== window.location.origin && 
+            !event.origin.includes('the-trek.onrender.com')) {
+          return;
+        }
+        
+        if (event.data && event.data.type === 'GOOGLE_FIT_AUTH' && event.data.code) {
+          console.log('Received auth code via postMessage');
+          window.removeEventListener('message', messageHandler);
+          
+          // Exchange code for tokens via backend
+          try {
+            const exchangeRes = await fetch(`${API_URL}/api/googlefit/exchange-code`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.accessToken}`
+              },
+              body: JSON.stringify({ code: event.data.code })
+            });
+            
+            if (!exchangeRes.ok) {
+              throw new Error('Failed to exchange code');
+            }
+            
+            toast({
+              title: "Google Fit Connected!",
+              description: "You can now sync your fitness data",
+              status: "success",
+              duration: 3000,
+            });
+            
+            // Re-check status
+            setTimeout(() => checkStatus(), 1000);
+          } catch (err) {
+            console.error('Code exchange failed:', err);
+            toast({
+              title: "Connection failed",
+              description: "Failed to complete Google Fit connection",
+              status: "error",
+              duration: 5000,
+            });
+          }
+        }
+      };
+      
+      window.addEventListener('message', messageHandler);
+      
       // Open Google OAuth in new window
       const width = 600;
       const height = 700;
@@ -82,6 +132,7 @@ export default function GoogleFitConnect() {
       
       // Check if popup was blocked
       if (!popup) {
+        window.removeEventListener('message', messageHandler);
         toast({
           title: "Popup blocked",
           description: "Please allow popups for this site",

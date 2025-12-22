@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Fit - Connecting...</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔗 Connecting to Google Fit...</h2>
+    <div class="spinner"></div>
+    <p id="status">Processing authorization...</p>
+  </div>
+
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const error = urlParams.get('error');
+      const status = document.getElementById('status');
+
+      if (error) {
+        status.innerHTML = `<div class="error">❌ Authorization failed: ${error}<br><br>You can close this window.</div>`;
+        setTimeout(() => window.close(), 3000);
+        return;
+      }
+
+      if (!code) {
+        status.innerHTML = '<div class="error">❌ No authorization code received<br><br>You can close this window.</div>';
+        setTimeout(() => window.close(), 3000);
+        return;
+      }
+
+      // Send code back to opener window
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({
+          type: 'GOOGLE_FIT_AUTH',
+          code: code
+        }, window.location.origin);
+        
+        status.textContent = '✅ Connected! Closing window...';
+        setTimeout(() => window.close(), 1000);
+      } else {
+        // Fallback: store code in sessionStorage and redirect
+        sessionStorage.setItem('googlefit_code', code);
+        window.location.href = '/profile';
+      }
+    })();
+  </script>
+</body>
+</html>
