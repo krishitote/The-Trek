@@ -47,7 +47,10 @@ export default function Dashboard() {
   const [showUserActivities, setShowUserActivities] = useState(false);
 
   const fetchData = async () => {
-    if (!session?.accessToken || !user) return;
+    if (!session?.accessToken || !user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const [userActs, leaderboard] = await Promise.all([
