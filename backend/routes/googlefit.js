@@ -5,6 +5,9 @@ import { authenticateToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Temporary storage for OAuth state (in production, use Redis)
+const pendingAuths = new Map();
+
 // Step 1: Initiate OAuth - user clicks "Connect Google Fit"
 router.get("/auth", authenticateToken, (req, res) => {
   const scope = [
@@ -12,15 +15,34 @@ router.get("/auth", authenticateToken, (req, res) => {
     "https://www.googleapis.com/auth/fitness.location.read",
   ].join(" ");
   
+  console.log('Generating OAuth URL for user:', req.user.id);
+  
+  // Generate a unique state token
+  const stateToken = `${req.user.id}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  
+  // Store user ID with state token (expires in 10 minutes)
+  pendingAuths.set(stateToken, {
+    userId: req.user.id,
+    timestamp: Date.now()
+  });
+  
+  // Clean up old entries (older than 10 minutes)
+  for (const [key, value] of pendingAuths.entries()) {
+    if (Date.now() - value.timestamp > 10 * 60 * 1000) {
+      pendingAuths.delete(key);
+    }
+  }
+  
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-    `client_id=${process.env.GOOGLE_CLIENT_ID}` +
-    `&redirect_uri=${process.env.GOOGLE_REDIRECT_URI}` +
+    `client_id=${encodeURIComponent(process.env.GOOGLE_CLIENT_ID)}` +
+    `&redirect_uri=${encodeURIComponent(process.env.GOOGLE_REDIRECT_URI)}` +
     `&response_type=code` +
     `&scope=${encodeURIComponent(scope)}` +
     `&access_type=offline` +
     `&prompt=consent` +
-    `&state=${req.user.id}`; // Pass user ID in state parameter
+    `&state=${encodeURIComponent(stateToken)}`; // Pass state token
   
+  console.log('Generated authUrl with state token');
   res.json({ authUrl });
 });
 
@@ -29,7 +51,12 @@ router.get("/callback", async (req, res) => {
   const { code, state, error } = req.query;
   
   // Log for debugging
-  console.log('Google Fit callback:', { code: !!code, state, error, query: req.query });
+  console.log('Google Fit callback received:', { 
+    hasCode: !!code, 
+    hasState: !!state, 
+    error,
+    allParams: Object.keys(req.query)
+  });
   
   if (error) {
     console.error('Google OAuth error:', error);
@@ -40,11 +67,38 @@ router.get("/callback", async (req, res) => {
     return res.status(400).send("<h2>❌ Missing authorization code</h2><p>Please try connecting again.</p>");
   }
   
-  const userId = state; // User ID from state parameter
-  
-  if (!userId) {
-    return res.status(400).send("<h2>❌ Missing user ID</h2><p>Please try connecting again from your profile page.</p>");
+  if (!state) {
+    return res.status(400).send(`
+      <html>
+        <body style="font-family: Arial; padding: 50px; text-align: center;">
+          <h2>❌ Missing state parameter</h2>
+          <p>Google did not return the state parameter. This might be a configuration issue.</p>
+          <p>Please contact support with this error.</p>
+          <button onclick="window.close()">Close Window</button>
+        </body>
+      </html>
+    `);
   }
+  
+  // Retrieve user ID from pending auths
+  const authData = pendingAuths.get(state);
+  
+  if (!authData) {
+    return res.status(400).send(`
+      <html>
+        <body style="font-family: Arial; padding: 50px; text-align: center;">
+          <h2>❌ Invalid or expired state token</h2>
+          <p>Your authorization session may have expired. Please try connecting again.</p>
+          <button onclick="window.close()">Close Window</button>
+        </body>
+      </html>
+    `);
+  }
+  
+  const userId = authData.userId;
+  pendingAuths.delete(state); // Clean up used state
+  
+  console.log('Retrieved user ID from state:', userId);
   
   try {
     // Exchange authorization code for tokens
