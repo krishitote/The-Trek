@@ -102,6 +102,7 @@ router.post("/login", authLimiter, validateLogin, async (req, res) => {
         first_name: user.first_name,
         last_name: user.last_name,
         gender: user.gender,
+        date_of_birth: user.date_of_birth,
         age: user.age,
         weight: user.weight,
         height: user.height,
