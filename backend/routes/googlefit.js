@@ -213,6 +213,19 @@ router.post("/exchange-code", authenticateToken, async (req, res) => {
 // Step 4: Check connection status
 router.get("/status", authenticateToken, async (req, res) => {
   try {
+    // Check if table exists first
+    const tableCheck = await pool.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'google_fit_tokens'
+      )`
+    );
+    
+    if (!tableCheck.rows[0].exists) {
+      console.log('google_fit_tokens table does not exist yet');
+      return res.json({ connected: false });
+    }
+    
     const result = await pool.query(
       "SELECT token_expires_at FROM google_fit_tokens WHERE user_id = $1",
       [req.user.id]
@@ -231,7 +244,8 @@ router.get("/status", authenticateToken, async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Status check failed:", err);
-    res.status(500).json({ error: "Failed to check connection status" });
+    // Return false instead of 500 error
+    res.json({ connected: false, error: err.message });
   }
 });
 

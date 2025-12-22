@@ -121,8 +121,8 @@ function App() {
           <Route path="/communities" element={user ? <Communities /> : <Navigate to="/login" replace />} />
           <Route path="/championship" element={user ? <Championship /> : <Navigate to="/login" replace />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
+          <Route path="/register" element={!user ? <Register /> : <Navigate to="/" replace />} />
         </Routes>
       </Box>
 

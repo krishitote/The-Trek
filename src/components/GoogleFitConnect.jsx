@@ -144,20 +144,30 @@ export default function GoogleFitConnect() {
       
       // Poll for popup closure (indicates completion)
       const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          // Re-check status after a short delay
-          setTimeout(() => {
-            checkStatus();
-            toast({
-              title: "Google Fit Connected!",
-              description: "You can now sync your fitness data",
-              status: "success",
-              duration: 3000,
-            });
-          }, 1000);
+        try {
+          if (popup && popup.closed) {
+            clearInterval(checkClosed);
+            // Re-check status after a short delay
+            setTimeout(() => {
+              checkStatus();
+              toast({
+                title: "Google Fit Connected!",
+                description: "You can now sync your fitness data",
+                status: "success",
+                duration: 3000,
+              });
+            }, 1000);
+          }
+        } catch (e) {
+          // Cross-Origin-Opener-Policy blocks window.closed check - ignore error
+          console.log('COOP policy active, relying on postMessage');
         }
-      }, 500);
+      }, 1000); // Check every 1 second
+      
+      // Cleanup after 2 minutes
+      setTimeout(() => {
+        clearInterval(checkClosed);
+      }, 120000);
       
     } catch (err) {
       console.error("Connection failed:", err);
