@@ -70,15 +70,20 @@ export default function GoogleFitConnect() {
       
       // Listen for postMessage from popup (fallback for missing state parameter)
       const messageHandler = async (event) => {
-        // Verify origin
-        if (event.origin !== window.location.origin && 
-            !event.origin.includes('the-trek.onrender.com')) {
+        // Verify origin - accept messages from same origin (our callback page)
+        console.log('Received postMessage from origin:', event.origin);
+        console.log('Current origin:', window.location.origin);
+        console.log('Message data:', event.data);
+        
+        if (event.origin !== window.location.origin) {
+          console.log('Rejected message from origin:', event.origin);
           return;
         }
         
         if (event.data && event.data.type === 'GOOGLE_FIT_AUTH' && event.data.code) {
-          console.log('Received auth code via postMessage');
+          console.log('Received auth code via postMessage:', event.data.code);
           window.removeEventListener('message', messageHandler);
+          clearInterval(checkClosed); // Stop polling
           
           // Exchange code for tokens via backend
           try {
@@ -147,26 +152,21 @@ export default function GoogleFitConnect() {
         try {
           if (popup && popup.closed) {
             clearInterval(checkClosed);
-            // Re-check status after a short delay
-            setTimeout(() => {
-              checkStatus();
-              toast({
-                title: "Google Fit Connected!",
-                description: "You can now sync your fitness data",
-                status: "success",
-                duration: 3000,
-              });
-            }, 1000);
+            console.log('Popup closed, checking status...');
+            // Just check status, don't show success toast (postMessage handler does that)
+            setTimeout(() => checkStatus(), 1000);
           }
         } catch (e) {
           // Cross-Origin-Opener-Policy blocks window.closed check - ignore error
-          console.log('COOP policy active, relying on postMessage');
+          // This is expected and harmless
         }
       }, 1000); // Check every 1 second
       
       // Cleanup after 2 minutes
       setTimeout(() => {
         clearInterval(checkClosed);
+        window.removeEventListener('message', messageHandler);
+        console.log('OAuth flow timeout - cleaning up listeners');
       }, 120000);
       
     } catch (err) {
