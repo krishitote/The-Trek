@@ -56,17 +56,14 @@ export default function GoogleFitConnect() {
     }
 
     try {
-      // Get OAuth URL from backend
-      const res = await fetch(`${API_URL}/api/googlefit/auth`, {
-        headers: { Authorization: `Bearer ${session.accessToken}` }
-      });
+      // Build OAuth URL directly to use frontend callback page
+      const clientId = '552143940046-1ho0b0377ui9jsvma0p2qm2ot8is4kct.apps.googleusercontent.com';
+      const redirectUri = `${window.location.origin}/googlefit-callback.html`;
+      const scope = 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.location.read';
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
       
-      if (!res.ok) {
-        throw new Error("Failed to get authorization URL");
-      }
-      
-      const data = await res.json();
-      console.log('Auth URL received:', data.authUrl); // Debug log
+      console.log('Auth URL:', authUrl);
+      console.log('Redirect URI:', redirectUri);
       
       // Listen for postMessage from popup (fallback for missing state parameter)
       const messageHandler = async (event) => {
@@ -129,7 +126,7 @@ export default function GoogleFitConnect() {
       const top = window.screen.height / 2 - height / 2;
       
       const popup = window.open(
-        data.authUrl,
+        authUrl,
         "Google Fit Authorization",
         `width=${width},height=${height},left=${left},top=${top}`
       );
