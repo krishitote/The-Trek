@@ -83,7 +83,6 @@ export default function GoogleFitConnect() {
         if (event.data && event.data.type === 'GOOGLE_FIT_AUTH' && event.data.code) {
           console.log('Received auth code via postMessage:', event.data.code);
           window.removeEventListener('message', messageHandler);
-          clearInterval(checkClosed); // Stop polling
           
           // Exchange code for tokens via backend
           try {
@@ -147,26 +146,11 @@ export default function GoogleFitConnect() {
         return;
       }
       
-      // Poll for popup closure (indicates completion)
-      const checkClosed = setInterval(() => {
-        try {
-          if (popup && popup.closed) {
-            clearInterval(checkClosed);
-            console.log('Popup closed, checking status...');
-            // Just check status, don't show success toast (postMessage handler does that)
-            setTimeout(() => checkStatus(), 1000);
-          }
-        } catch (e) {
-          // Cross-Origin-Opener-Policy blocks window.closed check - ignore error
-          // This is expected and harmless
-        }
-      }, 1000); // Check every 1 second
-      
-      // Cleanup after 2 minutes
+      // No need to poll popup.closed - we rely entirely on postMessage
+      // Just cleanup listener after 2 minutes timeout
       setTimeout(() => {
-        clearInterval(checkClosed);
         window.removeEventListener('message', messageHandler);
-        console.log('OAuth flow timeout - cleaning up listeners');
+        console.log('OAuth flow timeout - cleaning up listener');
       }, 120000);
       
     } catch (err) {
