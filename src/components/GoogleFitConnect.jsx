@@ -60,7 +60,13 @@ export default function GoogleFitConnect() {
       const res = await fetch(`${API_URL}/api/googlefit/auth`, {
         headers: { Authorization: `Bearer ${session.accessToken}` }
       });
-      const { authUrl } = await res.json();
+      
+      if (!res.ok) {
+        throw new Error("Failed to get authorization URL");
+      }
+      
+      const data = await res.json();
+      console.log('Auth URL received:', data.authUrl); // Debug log
       
       // Open Google OAuth in new window
       const width = 600;
@@ -69,7 +75,7 @@ export default function GoogleFitConnect() {
       const top = window.screen.height / 2 - height / 2;
       
       const popup = window.open(
-        authUrl,
+        data.authUrl,
         "Google Fit Authorization",
         `width=${width},height=${height},left=${left},top=${top}`
       );

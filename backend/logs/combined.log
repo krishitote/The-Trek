@@ -1153,3 +1153,11 @@
 {"level":"info","message":"Environment: development","timestamp":"2025-12-21T19:31:38.856Z"}
 {"level":"info","message":"Database: Connected","timestamp":"2025-12-21T19:31:38.857Z"}
 {"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-21T19:31:38.857Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-22T16:23:26.886Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-22T16:23:26.893Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-22T16:23:26.895Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-22T16:23:26.896Z"}
+{"level":"info","message":"🚀 Server started on port 5000","timestamp":"2025-12-22T16:49:58.706Z"}
+{"level":"info","message":"Environment: development","timestamp":"2025-12-22T16:49:58.710Z"}
+{"level":"info","message":"Database: Connected","timestamp":"2025-12-22T16:49:58.711Z"}
+{"level":"info","message":"Redis: Disabled (no caching)","timestamp":"2025-12-22T16:49:58.712Z"}

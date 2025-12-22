@@ -26,11 +26,24 @@ router.get("/auth", authenticateToken, (req, res) => {
 
 // Step 2: OAuth callback - Google redirects here with authorization code
 router.get("/callback", async (req, res) => {
-  const { code, state } = req.query;
+  const { code, state, error } = req.query;
+  
+  // Log for debugging
+  console.log('Google Fit callback:', { code: !!code, state, error, query: req.query });
+  
+  if (error) {
+    console.error('Google OAuth error:', error);
+    return res.status(400).send(`<h2>❌ Google authorization failed: ${error}</h2>`);
+  }
+  
+  if (!code) {
+    return res.status(400).send("<h2>❌ Missing authorization code</h2><p>Please try connecting again.</p>");
+  }
+  
   const userId = state; // User ID from state parameter
   
-  if (!code || !userId) {
-    return res.status(400).send("<h2>❌ Missing authorization code or user ID</h2>");
+  if (!userId) {
+    return res.status(400).send("<h2>❌ Missing user ID</h2><p>Please try connecting again from your profile page.</p>");
   }
   
   try {
