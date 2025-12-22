@@ -57,31 +57,48 @@
       const error = urlParams.get('error');
       const status = document.getElementById('status');
 
+      console.log('Callback page loaded');
+      console.log('Code:', code);
+      console.log('Error:', error);
+
       if (error) {
+        console.error('OAuth error:', error);
         status.innerHTML = `<div class="error">❌ Authorization failed: ${error}<br><br>You can close this window.</div>`;
         setTimeout(() => window.close(), 3000);
         return;
       }
 
       if (!code) {
+        console.error('No authorization code in URL');
         status.innerHTML = '<div class="error">❌ No authorization code received<br><br>You can close this window.</div>';
         setTimeout(() => window.close(), 3000);
         return;
       }
 
       // Send code back to opener window
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({
-          type: 'GOOGLE_FIT_AUTH',
-          code: code
-        }, window.location.origin);
+      try {
+        console.log('Attempting to send postMessage to opener');
+        console.log('window.opener exists?', !!window.opener);
+        console.log('Target origin:', window.location.origin);
         
-        status.textContent = '✅ Connected! Closing window...';
-        setTimeout(() => window.close(), 1000);
-      } else {
-        // Fallback: store code in sessionStorage and redirect
-        sessionStorage.setItem('googlefit_code', code);
-        window.location.href = '/profile';
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'GOOGLE_FIT_AUTH',
+            code: code
+          }, window.location.origin);
+          
+          console.log('postMessage sent successfully');
+          status.textContent = '✅ Connected! Closing window...';
+          setTimeout(() => window.close(), 1000);
+        } else {
+          console.warn('No window.opener, using fallback');
+          // Fallback: store code in sessionStorage and redirect
+          sessionStorage.setItem('googlefit_code', code);
+          window.location.href = '/profile';
+        }
+      } catch (err) {
+        console.error('postMessage failed:', err);
+        status.innerHTML = `<div class="error">❌ Connection failed: ${err.message}<br><br>Please close this window and try again.</div>`;
       }
     })();
   </script>
