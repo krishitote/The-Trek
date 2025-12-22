@@ -210,7 +210,11 @@ router.post("/exchange-code", authenticateToken, async (req, res) => {
     res.json({ success: true, message: "Google Fit connected successfully" });
   } catch (err) {
     console.error("❌ Token exchange failed:", err.response?.data || err.message);
-    res.status(500).json({ error: "Failed to exchange authorization code" });
+    console.error("Full error:", err);
+    res.status(500).json({ 
+      error: "Failed to exchange authorization code",
+      details: err.response?.data?.error_description || err.message 
+    });
   }
 });
 
