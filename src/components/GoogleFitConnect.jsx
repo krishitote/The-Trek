@@ -83,13 +83,17 @@ export default function GoogleFitConnect() {
           
           // Exchange code for tokens via backend
           try {
+            const redirectUri = `${window.location.origin}/googlefit-callback.html`;
             const exchangeRes = await fetch(`${API_URL}/api/googlefit/exchange-code`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${session.accessToken}`
               },
-              body: JSON.stringify({ code: event.data.code })
+              body: JSON.stringify({ 
+                code: event.data.code,
+                redirectUri: redirectUri
+              })
             });
             
             if (!exchangeRes.ok) {

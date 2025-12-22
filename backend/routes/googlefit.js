@@ -167,14 +167,18 @@ router.get("/callback", async (req, res) => {
 
 // Step 3b: Exchange code for tokens (fallback when state not working)
 router.post("/exchange-code", authenticateToken, async (req, res) => {
-  const { code } = req.body;
+  const { code, redirectUri } = req.body;
   const userId = req.user.id;
   
   console.log('Exchanging code for user:', userId);
+  console.log('Redirect URI:', redirectUri);
   
   if (!code) {
     return res.status(400).json({ error: "Missing authorization code" });
   }
+  
+  // Use the redirect URI from the request (frontend callback) or fall back to backend
+  const actualRedirectUri = redirectUri || process.env.GOOGLE_REDIRECT_URI;
   
   try {
     // Exchange authorization code for tokens
@@ -182,7 +186,7 @@ router.post("/exchange-code", authenticateToken, async (req, res) => {
       code,
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      redirect_uri: actualRedirectUri,
       grant_type: "authorization_code",
     });
 
