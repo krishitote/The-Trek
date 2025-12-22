@@ -48,6 +48,18 @@ export default function Profile() {
   // Check if profile is incomplete
   const isProfileIncomplete = !user?.gender || !user?.date_of_birth;
 
+  // Sync local state with user object when it changes
+  useEffect(() => {
+    if (user) {
+      setGender(user.gender || "");
+      setDateOfBirth(user.date_of_birth ? user.date_of_birth.split('T')[0] : "");
+      setWeight(user.weight || "");
+      setHeight(user.height || "");
+      setFirstName(user.first_name || "");
+      setLastName(user.last_name || "");
+    }
+  }, [user]);
+
   // Load earned badges
   useEffect(() => {
     if (session?.accessToken) {

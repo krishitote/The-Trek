@@ -1,26 +1,246 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { 
+  Box, 
+  Button, 
+  Text, 
+  VStack, 
+  useToast,
+  Badge,
+  HStack,
+  Spinner
+} from "@chakra-ui/react";
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function GoogleFitConnect() {
-  const connectGoogleFit = () => {
-    const scope = [
-      "https://www.googleapis.com/auth/fitness.activity.read",
-      "https://www.googleapis.com/auth/fitness.location.read",
-    ].join(" ");
-    const redirectUri = "https://the-trek.onrender.com/api/googlefit/callback";
+  const { session } = useAuth();
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const toast = useToast();
 
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+  // Check connection status on mount
+  useEffect(() => {
+    checkStatus();
+  }, []);
 
-    window.location.href = authUrl;
+  const checkStatus = async () => {
+    if (!session?.accessToken) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${API_URL}/api/googlefit/status`, {
+        headers: { Authorization: `Bearer ${session.accessToken}` }
+      });
+      const data = await res.json();
+      setConnected(data.connected);
+    } catch (err) {
+      console.error("Failed to check Google Fit status:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const connectGoogleFit = async () => {
+    if (!session?.accessToken) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to connect Google Fit",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      // Get OAuth URL from backend
+      const res = await fetch(`${API_URL}/api/googlefit/auth`, {
+        headers: { Authorization: `Bearer ${session.accessToken}` }
+      });
+      const { authUrl } = await res.json();
+      
+      // Open Google OAuth in new window
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      
+      const popup = window.open(
+        authUrl,
+        "Google Fit Authorization",
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+      
+      // Check if popup was blocked
+      if (!popup) {
+        toast({
+          title: "Popup blocked",
+          description: "Please allow popups for this site",
+          status: "error",
+          duration: 5000,
+        });
+        return;
+      }
+      
+      // Poll for popup closure (indicates completion)
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          // Re-check status after a short delay
+          setTimeout(() => {
+            checkStatus();
+            toast({
+              title: "Google Fit Connected!",
+              description: "You can now sync your fitness data",
+              status: "success",
+              duration: 3000,
+            });
+          }, 1000);
+        }
+      }, 500);
+      
+    } catch (err) {
+      console.error("Connection failed:", err);
+      toast({
+        title: "Connection failed",
+        description: "Failed to connect Google Fit",
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
+
+  const syncGoogleFit = async () => {
+    if (!session?.accessToken) return;
+    
+    setSyncing(true);
+    try {
+      const res = await fetch(`${API_URL}/api/googlefit/sync`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.accessToken}` }
+      });
+      
+      if (!res.ok) {
+        throw new Error("Sync failed");
+      }
+      
+      const data = await res.json();
+      
+      toast({
+        title: "Sync completed!",
+        description: `${data.activitiesSaved} new activities synced from Google Fit`,
+        status: "success",
+        duration: 5000,
+      });
+      
+      // Reload page to show new activities
+      setTimeout(() => window.location.reload(), 1500);
+      
+    } catch (err) {
+      console.error("Sync failed:", err);
+      toast({
+        title: "Sync failed",
+        description: "Failed to sync Google Fit data",
+        status: "error",
+        duration: 5000,
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const disconnectGoogleFit = async () => {
+    if (!session?.accessToken) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/api/googlefit/disconnect`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.accessToken}` }
+      });
+      
+      if (!res.ok) throw new Error("Disconnect failed");
+      
+      setConnected(false);
+      toast({
+        title: "Disconnected",
+        description: "Google Fit has been disconnected",
+        status: "info",
+        duration: 3000,
+      });
+    } catch (err) {
+      console.error("Disconnect failed:", err);
+      toast({
+        title: "Error",
+        description: "Failed to disconnect",
+        status: "error",
+        duration: 3000,
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box p={4} borderWidth={1} borderRadius="lg" bg="gray.50">
+        <HStack>
+          <Spinner size="sm" />
+          <Text>Checking Google Fit connection...</Text>
+        </HStack>
+      </Box>
+    );
+  }
+
   return (
-    <button
-      onClick={connectGoogleFit}
-      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-    >
-      Connect Google Fit
-    </button>
+    <Box p={4} borderWidth={1} borderRadius="lg" bg="gray.50">
+      <VStack spacing={3} align="stretch">
+        <HStack justify="space-between">
+          <Text fontWeight="bold" fontSize="lg">Google Fit Integration</Text>
+          {connected && (
+            <Badge colorScheme="green">Connected</Badge>
+          )}
+        </HStack>
+        
+        {connected ? (
+          <>
+            <Text fontSize="sm" color="gray.600">
+              Sync your fitness activities from Google Fit automatically
+            </Text>
+            <HStack spacing={2}>
+              <Button
+                colorScheme="brand"
+                onClick={syncGoogleFit}
+                isLoading={syncing}
+                loadingText="Syncing..."
+              >
+                Sync Now
+              </Button>
+              <Button
+                variant="outline"
+                colorScheme="red"
+                size="sm"
+                onClick={disconnectGoogleFit}
+              >
+                Disconnect
+              </Button>
+            </HStack>
+          </>
+        ) : (
+          <>
+            <Text fontSize="sm" color="gray.600">
+              Connect Google Fit to automatically import your fitness activities
+            </Text>
+            <Button
+              colorScheme="brand"
+              onClick={connectGoogleFit}
+              leftIcon={<span>🔗</span>}
+            >
+              Connect Google Fit
+            </Button>
+          </>
+        )}
+      </VStack>
+    </Box>
   );
 }
