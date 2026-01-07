@@ -9,8 +9,10 @@ FormControl,
 FormLabel,
 useToast,
 Spinner,
+Text,
+Link as ChakraLink,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
@@ -139,6 +141,13 @@ return (
         >
           {loading ? <Spinner size="sm" /> : "🚀 Login"}
         </Button>
+
+        <Text fontSize="sm" color="gray.600" textAlign="center">
+          Forgot your password?{" "}
+          <ChakraLink as={Link} to="/forgot-password" color="brand.500" fontWeight="bold">
+            Reset it here
+          </ChakraLink>
+        </Text>
       </VStack>
     </form>
   </Box>

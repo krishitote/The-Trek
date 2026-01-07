@@ -84,9 +84,10 @@ export default function Profile() {
 
   // Calculate BMI
   const calculateBMI = (w, h) => {
-    if (!w || !h) return null;
+    if (!w || !h || w <= 0 || h <= 0) return null;
     const heightM = h / 100;
-    return (w / (heightM * heightM)).toFixed(1);
+    const bmiValue = w / (heightM * heightM);
+    return isNaN(bmiValue) ? null : bmiValue.toFixed(1);
   };
 
   const getBMICategory = (bmi) => {

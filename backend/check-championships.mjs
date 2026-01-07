@@ -9,20 +9,37 @@ const pool = new pg.Pool({
 
 console.log('Checking championships...\n');
 
-pool.query('SELECT * FROM championships ORDER BY created_at DESC LIMIT 5')
-  .then(res => {
-    if (res.rows.length === 0) {
-      console.log('⚠️  Championships table exists but is EMPTY');
-      console.log('The API returns an empty array, which might be causing frontend issues.\n');
-    } else {
-      console.log('Championships found:');
-      res.rows.forEach(c => {
-        console.log(`- ${c.name} (${c.start_date} to ${c.end_date}) - Active: ${c.is_active}`);
-      });
-    }
-    pool.end();
-  })
-  .catch(err => {
-    console.log('❌ Error querying championships:', err.message);
-    pool.end();
-  });
+// Check both possible table names
+Promise.all([
+  pool.query("SELECT * FROM championships ORDER BY created_at DESC LIMIT 5").catch(e => ({ error: e.message, table: 'championships' })),
+  pool.query("SELECT * FROM annual_championships ORDER BY created_at DESC LIMIT 5").catch(e => ({ error: e.message, table: 'annual_championships' }))
+]).then(([champRes, annualRes]) => {
+  console.log('=== CHAMPIONSHIPS TABLE ===');
+  if (champRes.error) {
+    console.log(`❌ Error: ${champRes.error}`);
+  } else if (champRes.rows.length === 0) {
+    console.log('⚠️  Table exists but is EMPTY');
+  } else {
+    console.log('✅ Found championships:');
+    champRes.rows.forEach(c => {
+      console.log(`- ${c.title || c.name} (${c.start_date} to ${c.end_date})`);
+    });
+  }
+  
+  console.log('\n=== ANNUAL_CHAMPIONSHIPS TABLE ===');
+  if (annualRes.error) {
+    console.log(`❌ Error: ${annualRes.error}`);
+  } else if (annualRes.rows.length === 0) {
+    console.log('⚠️  Table exists but is EMPTY');
+  } else {
+    console.log('✅ Found annual championships:');
+    annualRes.rows.forEach(c => {
+      console.log(`- Year ${c.year} (${c.start_date} to ${c.end_date}) - Open: ${c.registration_open}`);
+    });
+  }
+  
+  pool.end();
+}).catch(err => {
+  console.log('❌ Unexpected error:', err.message);
+  pool.end();
+});

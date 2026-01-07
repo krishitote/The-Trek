@@ -1,7 +1,7 @@
 # The Trek - AI Coding Agent Instructions
 
 ## Project Overview
-**The Trek** is a full-stack fitness tracking platform with social leaderboards. Users log activities (running, cycling, swimming), track progress with charts, and compete on global/gender/activity-type leaderboards. Includes Google Fit OAuth integration and profile management with BMI calculation.
+**The Trek** is a full-stack fitness tracking platform with social features, communities, badges, and annual championships. Users log activities (running, cycling, swimming), track progress with charts, compete on leaderboards, earn badges, join communities, and contribute to yearly championship events.
 
 **Live:** https://trekfit.co.ke (Frontend: TrueHost, Backend: Render, DB: Neon PostgreSQL)
 
@@ -16,6 +16,7 @@
 - **Registration/Login** → Returns `{ accessToken, refreshToken, user }` 
 - **Access Token:** 15-min expiry, used for all API calls (`Authorization: Bearer <token>`)
 - **Refresh Token:** 7-day expiry, stored in database, auto-rotates every 14 minutes client-side
+- **Password Reset:** Simplified flow - username + email verification (no email sending), updates password and clears refresh tokens
 - **Auth Flow:**
   1. Login → Store both tokens in `localStorage` (web) / `AsyncStorage` (mobile)
   2. Frontend (`AuthContext.jsx`) auto-refreshes access token via `setInterval(14min)`
@@ -24,18 +25,29 @@
 - **Token Utils:** `backend/utils/tokens.js` - `generateAccessToken()`, `generateRefreshToken()`, `verifyAccessToken()`
 
 ### Data Entities
-**PostgreSQL Schema (Updated):**
+**PostgreSQL Schema (Current):**
 ```sql
 users (
-  id, username, email, password, 
-  weight, height, profile_image,
-  first_name, last_name, gender, date_of_birth,  -- Added via migrations
-  refresh_token, refresh_token_expires           -- Added via migrations
+  id, username, email, password, first_name, last_name, gender, 
+  date_of_birth, weight, height, profile_image, weekly_distance_goal,
+  is_admin, badge_count, follower_count, following_count, created_at,
+  refresh_token, refresh_token_expires,
+  google_fit_token, google_fit_refresh_token
 )
-activities (id, user_id, type, distance_km, duration_min, date)
+activities (id, user_id, type, distance_km, duration_min, date, calories_burned, like_count, comment_count)
+communities (id, name, description, invite_code, is_private, is_approved, registration_fee, created_by, created_at)
+community_members (community_id, user_id, role, joined_at)
+annual_championships (year, event_date, registration_fee, spectator_price, participant_price, is_registration_open, qualifications_close_at)
+contributions (championship_id, user_id, amount, mpesa_code, created_at)
+badges (name, description, icon, category, criteria)
+user_badges (user_id, badge_id, earned_at)
+follows (follower_id, following_id)
+activity_likes (activity_id, user_id)
+activity_comments (activity_id, user_id, content)
 ```
-**Schema Evolution:** Database uses migrations (`backend/migrations/*.sql`), not seed files. Run via Neon SQL Editor or `psql`.  
-No ORM - raw SQL with parameterized queries (`$1`, `$2`) for injection safety.
+**Schema Evolution:** Database uses migrations (`backend/migrations/*.sql`), not seed files. Migrations come in pairs: `00X_name.sql` (local) and `00X_name_NEON.sql` (production). Run via Neon SQL Editor.  
+No ORM - raw SQL with parameterized queries (`$1`, `$2`) for injection safety.  
+**Database Triggers:** Auto-update counters (`badge_count`, `like_count`, `comment_count`, `follower_count`, `following_count`) via PostgreSQL triggers - never manually update these.
 
 ## Development Workflows
 
@@ -88,12 +100,15 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 ### Backend Patterns
 1. **Route Organization:** All routes in `backend/routes/*.js`, imported in `server.js`
    - Example: `backend/routes/activities.js` exports Express router, imported as `activityRoutes`
+   - Routes: `auth`, `activities`, `users`, `upload`, `googlefit`, `leaderboards`, `communities`, `championships`, `admin`, `stats`, `badges`, `social`
 2. **Validation First:** Use Joi middleware (`backend/middleware/validation.js`) before route handlers
    - Applied: `router.post("/", authenticateToken, validateActivity, async (req, res) => {...})`
    - All POST/PUT routes MUST have Joi validators (security requirement)
 3. **Error Handling:** Catch-all errors return `{ error: 'message' }` (no stack traces in production)
-4. **CORS:** Whitelist domains in `server.js` line 38-42 (`allowedOrigins` array)
+4. **CORS:** Whitelist domains in `server.js` line 44-52 (`allowedOrigins` array) - includes production + multiple local ports
 5. **Logging:** Winston logger (`backend/config/logger.js`) logs to `backend/logs/` with request IDs
+6. **Admin Access:** Use `requireAdmin` middleware (checks `is_admin` flag) AFTER `authenticateToken`
+   - Grant via: `node backend/scripts/make-admin.mjs user@email.com`
 
 ### Frontend Patterns
 1. **API Calls:** Centralized in `src/services/api.js` (exports `apiLogin`, `apiSubmitActivity`, etc.)
@@ -113,6 +128,7 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 - **Solution:** Use `/api/leaderboards/quick` endpoint (single query with SQL aggregation)
 - **File:** `backend/routes/leaderboards.js` line 8-25 (optimized with `LEFT JOIN` and `SUM()`)
 - **Caching:** Redis cache middleware with 5-minute TTL (gracefully disabled if Redis unavailable)
+- **Window Functions:** Leaderboard queries use `ROW_NUMBER() OVER (PARTITION BY ...)` to fetch only top 10 per category, avoiding full table scans
 
 ### Security Patterns
 1. **Input Validation:** All POST/PUT routes MUST use Joi validators (see `backend/middleware/validation.js`)
@@ -152,14 +168,16 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 
 ## Common Pitfalls
 
-1. **CORS Errors:** If new domain added, update `backend/server.js` line 32 `allowedOrigins` array
-2. **JWT Expiry:** Tokens expire in 7 days (no refresh token yet), user must re-login
+1. **CORS Errors:** If new domain added, update `backend/server.js` line 44 `allowedOrigins` array
+2. **JWT Expiry:** Access tokens expire in 15 min, refresh tokens in 7 days - auto-refresh runs client-side
 3. **Database Connection:** Use `pool.query()` not `pool.connect().query()` (connection leaks)
 4. **Mobile API URL:** Hardcoded in `the-trek-mobile/api/index.js` (should use env var)
 5. **BMI Calculation:** Weight in kg, height in cm → formula: `weight / ((height/100)²)` in `server.js`
 6. **Redis Unavailable:** Don't assume Redis exists - check `getRedisClient()` returns null, skip caching gracefully
 7. **Token Refresh Loop:** Auto-refresh runs every 14 minutes - avoid creating multiple intervals
 8. **Cache Invalidation:** When modifying data (POST/PUT/DELETE), call `invalidateCache(pattern)` to clear stale cache
+9. **Database Triggers:** Counters auto-update via triggers - never manually `UPDATE` `badge_count`, `like_count`, `comment_count`, etc.
+10. **Migration Pairs:** Always create both local (`00X_name.sql`) and Neon (`00X_name_NEON.sql`) versions with same logic
 
 ## Testing Checklist (Before Deploy)
 - [ ] Run `npm run dev` for both frontend and backend, test locally
@@ -174,8 +192,9 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 - **Validation rules:** `backend/middleware/validation.js` (Joi schemas)
 - **Database pool:** `backend/db.js` (PostgreSQL connection)
 - **Route definitions:** `backend/routes/*.js` (activities, auth, leaderboards, upload, users, googlefit)
-- **Main pages:** `src/pages/` (Home, Dashboard, Profile, Login, Register)
-- **Leaderboard optimization:** `backend/routes/leaderboards.js` line 6 (`/quick` endpoint)
+- **Main pages:** `src/pages/` (Home, Dashboard, Profile, Login, Register, Communities, Championship, Badges, Feed, AdminDashboard)
+- **Leaderboard optimization:** `backend/routes/leaderboards.js` line 8 (`/quick` endpoint)
+- **Admin scripts:** `backend/scripts/make-admin.mjs` (grant admin access)
 
 ## Mobile App Notes (React Native)
 - **Navigation:** `the-trek-mobile/navigation/AppNavigator.js` (stack navigator)
@@ -185,5 +204,5 @@ GOOGLE_REDIRECT_URI=https://the-trek.onrender.com/api/googlefit/callback
 
 ---
 
-**Last Updated:** December 19, 2025  
+**Last Updated:** January 5, 2026  
 **Repo:** https://github.com/krishitote/The-Trek

@@ -177,4 +177,51 @@ router.post("/logout", async (req, res) => {
   }
 });
 
+// Reset password (simplified - no email, uses username + email verification)
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { username, email, newPassword } = req.body;
+    
+    // Validate input
+    if (!username || !email || !newPassword) {
+      return res.status(400).json({ error: 'Username, email, and new password are required' });
+    }
+    
+    // Validate password strength
+    if (newPassword.length < 8 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+      return res.status(400).json({ 
+        error: 'Password must be at least 8 characters with uppercase, lowercase, and number' 
+      });
+    }
+    
+    // Find user by username AND email (security check)
+    const result = await pool.query(
+      'SELECT id FROM users WHERE username = $1 AND email = $2',
+      [username, email]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found with that username and email combination' });
+    }
+    
+    const userId = result.rows[0].id;
+    
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Update password and clear refresh tokens (force re-login)
+    await pool.query(
+      `UPDATE users 
+       SET password = $1, refresh_token = NULL, refresh_token_expires = NULL 
+       WHERE id = $2`,
+      [hashedPassword, userId]
+    );
+    
+    res.json({ success: true, message: 'Password reset successfully. Please login with your new password.' });
+  } catch (err) {
+    console.error("Password reset failed:", err);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
 export default router;

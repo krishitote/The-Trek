@@ -15,7 +15,8 @@ router.get('/current', async (req, res) => {
     `);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'No active championship' });
+      // Return null instead of 404 - frontend handles this gracefully
+      return res.json(null);
     }
     
     const championship = result.rows[0];

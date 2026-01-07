@@ -17,7 +17,7 @@ export const authLimiter = rateLimit({
 // General API endpoints - reasonable limits
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per 15 min
+  max: 300, // 300 requests per 15 min (allows admin dashboard + normal usage)
   message: { 
     error: 'Too many requests. Please slow down.' 
   },

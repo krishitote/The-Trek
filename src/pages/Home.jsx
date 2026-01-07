@@ -183,44 +183,46 @@ export default function Home() {
           {/* Feature Banners - Side by Side */}
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
             {/* Grand Finale Banner */}
-            {championship && (
-              <Card 
-                bg="linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)" 
-                color="white"
-                boxShadow="lg"
-                _hover={{ transform: 'translateY(-2px)', transition: '0.2s' }}
-                transition="0.2s"
-              >
-                <CardBody p={5}>
-                  <VStack spacing={2} align="start">
-                    <Badge colorScheme="yellow" fontSize="xs" px={2} py={0.5}>
-                      {championship.registration_open ? "OPEN NOW" : "COMING SOON"}
-                    </Badge>
-                    <Heading size="md">🏆 Grand Finale {championship.year}</Heading>
-                    <Text fontSize="xs" opacity={0.9}>
-                      Top 10 compete. Spectators welcome!
-                    </Text>
-                    <Divider borderColor="whiteAlpha.400" />
-                    <VStack align="start" spacing={0.5} fontSize="xs">
-                      <Text>💰 Spectators: Ksh 5,000</Text>
-                      <Text>🏃 Participants: Ksh 10,000</Text>
-                      <Text>⭐ Top 10: FREE</Text>
-                    </VStack>
-                    <Button 
-                      as={Link} 
-                      to={user ? "/championship" : "/register"} 
-                      colorScheme="whiteAlpha"
-                      variant="solid"
-                      size="sm"
-                      w="full"
-                      mt={1}
-                    >
-                      {championship.registration_open ? "Register" : "Learn More"}
-                    </Button>
+            <Card 
+              bg="linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)" 
+              color="white"
+              boxShadow="lg"
+              _hover={{ transform: 'translateY(-2px)', transition: '0.2s' }}
+              transition="0.2s"
+            >
+              <CardBody p={5}>
+                <VStack spacing={2} align="start">
+                  <Badge colorScheme="yellow" fontSize="xs" px={2} py={0.5}>
+                    {championship?.registration_open ? "OPEN NOW" : "COMING SOON"}
+                  </Badge>
+                  <Heading size="md">
+                    🏆 Grand Finale {championship?.year || new Date().getFullYear()}
+                  </Heading>
+                  <Text fontSize="xs" opacity={0.9}>
+                    {championship 
+                      ? "Top 10 compete. Spectators welcome!" 
+                      : "Annual championship event - Details coming soon!"}
+                  </Text>
+                  <Divider borderColor="whiteAlpha.400" />
+                  <VStack align="start" spacing={0.5} fontSize="xs">
+                    <Text>💰 Spectators: Ksh 5,000</Text>
+                    <Text>🏃 Participants: Ksh 10,000</Text>
+                    <Text>⭐ Top 10: FREE</Text>
                   </VStack>
-                </CardBody>
-              </Card>
-            )}
+                  <Button 
+                    as={Link} 
+                    to={user ? "/championship" : "/register"} 
+                    colorScheme="whiteAlpha"
+                    variant="solid"
+                    size="sm"
+                    w="full"
+                    mt={1}
+                  >
+                    {championship?.registration_open ? "Register" : "Learn More"}
+                  </Button>
+                </VStack>
+              </CardBody>
+            </Card>
 
             {/* Communities Banner */}
             <Card 

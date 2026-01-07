@@ -143,11 +143,19 @@ export default function AdminDashboard() {
   const loadUsers = async (page = 1) => {
     try {
       const data = await apiGetAdminUsers(session.accessToken, page, 20, usersSearch);
-      setUsers(data.users);
-      setUsersPagination(data.pagination);
+      // Handle both array and object responses
+      if (Array.isArray(data)) {
+        setUsers(data);
+        setUsersPagination({ page: 1, total: data.length, pages: 1 });
+      } else {
+        setUsers(data.users || []);
+        setUsersPagination(data.pagination || {});
+      }
       setUsersPage(page);
     } catch (err) {
+      console.error('Error loading users:', err);
       toast({ title: 'Error loading users', description: err.message, status: 'error', duration: 3000 });
+      setUsers([]); // Set empty array on error to prevent crash
     }
   };
 
@@ -258,18 +266,18 @@ export default function AdminDashboard() {
 
   // Chart Data
   const userGrowthChartData = {
-    labels: userGrowth.map(d => new Date(d.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })),
+    labels: (userGrowth || []).map(d => new Date(d.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })),
     datasets: [
       {
         label: 'Total Users',
-        data: userGrowth.map(d => d.cumulative_users),
+        data: (userGrowth || []).map(d => d.cumulative_users),
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         tension: 0.4,
       },
       {
         label: 'New Users',
-        data: userGrowth.map(d => d.new_users),
+        data: (userGrowth || []).map(d => d.new_users),
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         tension: 0.4,
@@ -278,11 +286,11 @@ export default function AdminDashboard() {
   };
 
   const activityTrendsChartData = {
-    labels: activityTrends.map(d => new Date(d.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+    labels: (activityTrends || []).map(d => new Date(d.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
     datasets: [
       {
         label: 'Activities',
-        data: activityTrends.map(d => d.activity_count),
+        data: (activityTrends || []).map(d => d.activity_count),
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
       },
     ],
@@ -330,8 +338,8 @@ export default function AdminDashboard() {
                     <CardBody>
                       <Stat>
                         <StatLabel>Total Distance</StatLabel>
-                        <StatNumber color="blue.500">{parseFloat(stats.total_distance).toFixed(0)} km</StatNumber>
-                        <StatHelpText>+{parseFloat(stats.distance_30d).toFixed(0)} km this month</StatHelpText>
+                        <StatNumber color="blue.500">{parseFloat(stats.total_distance || 0).toFixed(0)} km</StatNumber>
+                        <StatHelpText>+{parseFloat(stats.distance_30d || 0).toFixed(0)} km this month</StatHelpText>
                       </Stat>
                     </CardBody>
                   </Card>
@@ -339,8 +347,8 @@ export default function AdminDashboard() {
                     <CardBody>
                       <Stat>
                         <StatLabel>Total Calories</StatLabel>
-                        <StatNumber color="orange.500">{parseInt(stats.total_calories).toLocaleString()}</StatNumber>
-                        <StatHelpText>+{parseInt(stats.calories_30d).toLocaleString()} this month</StatHelpText>
+                        <StatNumber color="orange.500">{parseInt(stats.total_calories || 0).toLocaleString()}</StatNumber>
+                        <StatHelpText>+{parseInt(stats.calories_30d || 0).toLocaleString()} this month</StatHelpText>
                       </Stat>
                     </CardBody>
                   </Card>
@@ -396,7 +404,7 @@ export default function AdminDashboard() {
                         </Tr>
                       </Thead>
                       <Tbody>
-                        {topUsers.map(u => (
+                        {(topUsers || []).map(u => (
                           <Tr key={u.id}>
                             <Td>
                               {u.username}
@@ -442,7 +450,7 @@ export default function AdminDashboard() {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {users.map(u => (
+                    {(users || []).map(u => (
                       <Tr key={u.id}>
                         <Td>
                           {u.first_name} {u.last_name} (@{u.username})
@@ -508,7 +516,7 @@ export default function AdminDashboard() {
             </Button>
 
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-              {championships.map(champ => (
+              {(championships || []).map(champ => (
                 <Card key={champ.id}>
                   <CardBody>
                     <HStack justify="space-between" mb={2}>
