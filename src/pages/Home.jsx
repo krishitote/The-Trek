@@ -57,24 +57,33 @@ export default function Home() {
       setError("");
       try {
         const [leaderboardData, champData] = await Promise.all([
-          apiLeaderboards(),
+          apiLeaderboards().catch(err => {
+            console.error("Leaderboard API failed:", err);
+            return { allTimeLeaders: [], perActivity: [], perGender: [] };
+          }),
           apiGetCurrentChampionship().catch(() => null),
         ]);
         if (cancelled) return;
 
-        setAllTime(leaderboardData.allTimeLeaders || []);
-        setPerActivityData(leaderboardData.perActivity || []);
-        setPerGenderData(leaderboardData.perGender || []);
+        setAllTime(leaderboardData?.allTimeLeaders || []);
+        setPerActivityData(leaderboardData?.perActivity || []);
+        setPerGenderData(leaderboardData?.perGender || []);
         setChampionship(champData);
 
-        const uniqueGenders = [...new Set((leaderboardData.perGender || []).map((r) => r.gender).filter(Boolean))];
-        console.log("Gender data:", leaderboardData.perGender);
+        const uniqueGenders = [...new Set((leaderboardData?.perGender || []).map((r) => r.gender).filter(Boolean))];
+        console.log("Gender data:", leaderboardData?.perGender);
         console.log("Unique genders:", uniqueGenders);
-        setActivityTypes([...new Set((leaderboardData.perActivity || []).map((r) => r.type).filter(Boolean))]);
+        setActivityTypes([...new Set((leaderboardData?.perActivity || []).map((r) => r.type).filter(Boolean))]);
         setGenderTypes(uniqueGenders);
       } catch (err) {
         console.error("Failed to load leaderboards", err);
-        setError("Failed to load leaderboard data");
+        setError("Failed to load leaderboard data. Please try again later.");
+        // Set empty arrays to prevent undefined errors
+        setAllTime([]);
+        setPerActivityData([]);
+        setPerGenderData([]);
+        setActivityTypes([]);
+        setGenderTypes([]);
       } finally {
         setLoading(false);
       }

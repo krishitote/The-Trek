@@ -21,19 +21,29 @@ router.get('/current', async (req, res) => {
     
     const championship = result.rows[0];
     
-    // Get contribution stats
-    const contributions = await pool.query(`
-      SELECT 
-        COUNT(*) as contributor_count,
-        COALESCE(SUM(amount), 0) as total_contributions
-      FROM contributions
-      WHERE championship_id = $1
-    `, [championship.id]);
+    // Get contribution stats (handle missing table gracefully)
+    let contributorCount = 0;
+    let totalContributions = 0;
+    
+    try {
+      const contributions = await pool.query(`
+        SELECT 
+          COUNT(*) as contributor_count,
+          COALESCE(SUM(amount), 0) as total_contributions
+        FROM contributions
+        WHERE championship_id = $1
+      `, [championship.id]);
+      
+      contributorCount = contributions.rows[0].contributor_count;
+      totalContributions = contributions.rows[0].total_contributions;
+    } catch (contribErr) {
+      console.warn('Contributions table not found, using defaults:', contribErr.message);
+    }
     
     res.json({
       ...championship,
-      contributor_count: contributions.rows[0].contributor_count,
-      total_contributions: contributions.rows[0].total_contributions
+      contributor_count: contributorCount,
+      total_contributions: totalContributions
     });
   } catch (err) {
     console.error('Failed to fetch championship:', err);

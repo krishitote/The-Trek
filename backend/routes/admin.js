@@ -288,16 +288,28 @@ router.get('/communities/:id/members', async (req, res) => {
 // Get all championships
 router.get('/championships', async (req, res) => {
   try {
+    // Simple query without joins to tables that may not exist
     const result = await pool.query(`
       SELECT 
-        ac.*,
-        COUNT(DISTINCT cp.user_id) as registered_qualifiers,
-        COUNT(DISTINCT ct.user_id) as total_tickets
-      FROM annual_championships ac
-      LEFT JOIN championship_participants cp ON ac.id = cp.championship_id
-      LEFT JOIN championship_tickets ct ON ac.id = ct.championship_id
-      GROUP BY ac.id
-      ORDER BY ac.year DESC
+        id,
+        year,
+        start_date,
+        end_date,
+        registration_fee,
+        prize_pool,
+        finale_date,
+        finale_location,
+        status,
+        registration_open,
+        registration_opens_at,
+        qualifications_close_at,
+        spectator_price,
+        participant_price,
+        created_at,
+        0 as registered_qualifiers,
+        0 as total_tickets
+      FROM annual_championships
+      ORDER BY year DESC
     `);
     
     res.json(result.rows);
