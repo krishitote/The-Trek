@@ -95,9 +95,10 @@ app.use("/api/stats", statsRoutes);
 app.use("/api/badges", badgeRoutes);
 app.use("/api/social", socialRoutes);
 
-// ✅ Photo upload routes (with upload-specific rate limiting)
-app.use("/api/upload", uploadLimiter, uploadRoutes);
-app.use("/uploads", express.static("uploads")); // serve uploaded files
+// ✅ Photo upload routes (strict limit applies to uploads only, not image loads)
+app.post("/api/upload", uploadLimiter);
+app.use("/api/upload", uploadRoutes);
+app.use("/uploads", express.static("uploads")); // legacy files uploaded before photos moved to the database
 
 // --- Health Check Route ---
 app.get("/api/health", async (req, res) => {
