@@ -1,13 +1,11 @@
 // backend/routes/auth.js
 import express from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import pool from "../db.js";
 import { 
   generateAccessToken, 
   generateRefreshToken, 
-  verifyAccessToken,
   getRefreshTokenExpiry 
 } from '../utils/tokens.js';
 import { 
@@ -30,7 +28,7 @@ router.post("/register", authLimiter, validateRegistration, async (req, res) => 
     const result = await pool.query(
       `INSERT INTO users (username, email, password)
        VALUES ($1, $2, $3)
-       RETURNING id, username, email, is_admin`,
+      RETURNING id, username, email, is_admin, show_on_leaderboard`,
       [username, email, hashedPassword]
     );
 
@@ -107,6 +105,7 @@ router.post("/login", authLimiter, validateLogin, async (req, res) => {
         weight: user.weight,
         height: user.height,
         profile_image: user.profile_image,
+        show_on_leaderboard: user.show_on_leaderboard ?? false,
         is_admin: user.is_admin || false
       }
     });

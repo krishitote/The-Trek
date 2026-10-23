@@ -228,57 +228,6 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// -------------------- Users --------------------
-app.get("/api/users", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT id as user_id, first_name, last_name, username, email, gender, age, weight, height FROM users"
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch users" });
-  }
-});
-
-// -------------------- Activities --------------------
-app.get("/api/activities", async (req, res) => {
-  const userId = req.query.user_id;
-  let query = "SELECT * FROM activities";
-  const params = [];
-  if (userId) {
-    query += " WHERE user_id = $1";
-    params.push(userId);
-  }
-
-  try {
-    const result = await pool.query(query, params);
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch activities" });
-  }
-});
-
-app.post("/api/activities", authMiddleware, async (req, res) => {
-  const { type, distance_km, duration_min, date } = req.body;
-  if (!type || !distance_km || !duration_min)
-    return res.status(400).json({ error: "Missing fields" });
-
-  try {
-    const result = await pool.query(
-      `INSERT INTO activities (user_id, type, distance_km, duration_min, date)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
-      [req.userId, type, distance_km, duration_min, date || new Date()]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to submit activity" });
-  }
-});
-
 // -------------------- Update User Weight & Height --------------------
 app.put("/api/users/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;

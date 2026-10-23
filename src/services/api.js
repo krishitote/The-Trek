@@ -16,12 +16,6 @@ function authHeaders(token) {
     : { "Content-Type": "application/json" };
 }
 
-// ---------- Users ----------
-export async function apiUsers() {
-  const res = await fetch(`${API_URL}/api/users`);
-  return handleResponse(res);
-}
-
 // ---------- Activities ----------
 export async function apiActivities(token = null, userId = null) {
   const url = new URL(`${API_URL}/api/activities`);

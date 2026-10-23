@@ -20,6 +20,7 @@ import {
   FormControl,
   FormLabel,
   Select,
+  Checkbox,
   Alert,
   AlertIcon,
   AlertDescription,
@@ -37,6 +38,7 @@ export default function Profile() {
   const [height, setHeight] = useState(user?.height || "");
   const [firstName, setFirstName] = useState(user?.first_name || "");
   const [lastName, setLastName] = useState(user?.last_name || "");
+  const [showOnLeaderboard, setShowOnLeaderboard] = useState(user?.show_on_leaderboard ?? false);
   
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,6 +59,7 @@ export default function Profile() {
       setHeight(user.height || "");
       setFirstName(user.first_name || "");
       setLastName(user.last_name || "");
+      setShowOnLeaderboard(user.show_on_leaderboard ?? false);
     }
   }, [user]);
 
@@ -127,6 +130,7 @@ export default function Profile() {
         height: height ? Number(height) : null,
         first_name: firstName || null,
         last_name: lastName || null,
+        show_on_leaderboard: showOnLeaderboard,
       };
       
       const res = await fetch(
@@ -417,6 +421,20 @@ export default function Profile() {
               )}
             </FormControl>
           </SimpleGrid>
+
+          {editing ? (
+            <Checkbox
+              mt={6}
+              isChecked={showOnLeaderboard}
+              onChange={(event) => setShowOnLeaderboard(event.target.checked)}
+            >
+              Show my username and activity totals on public leaderboards
+            </Checkbox>
+          ) : (
+            <Text mt={6} color="gray.600">
+              Public leaderboards: {showOnLeaderboard ? "Opted in" : "Opted out"}
+            </Text>
+          )}
         </Box>
 
         {/* Stats Cards with Health Metrics */}
@@ -652,7 +670,10 @@ export default function Profile() {
                 borderRadius="full"
                 px={8}
                 _hover={{ bg: "gray.100" }}
-                onClick={() => setEditing(false)}
+                onClick={() => {
+                  setShowOnLeaderboard(user.show_on_leaderboard ?? false);
+                  setEditing(false);
+                }}
                 leftIcon={<Text fontSize="xl">❌</Text>}
               >
                 Cancel

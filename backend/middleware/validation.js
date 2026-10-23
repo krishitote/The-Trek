@@ -63,6 +63,7 @@ export const validateProfileUpdate = (req, res, next) => {
     date_of_birth: Joi.date().max('now').required(),
     weight: Joi.number().positive().max(500).allow(null).optional(),
     height: Joi.number().positive().max(300).allow(null).optional(),
+    show_on_leaderboard: Joi.boolean().optional(),
   }).min(1); // At least one field required
 
   const { error } = schema.validate(req.body);

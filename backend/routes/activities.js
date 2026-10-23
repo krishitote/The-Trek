@@ -8,6 +8,7 @@ import { invalidateCache } from '../middleware/cache.js';
 import { checkAndAwardBadges } from './badges.js';
 import { calculateCalories } from '../utils/calorieCalculator.js';
 
+export function createActivityRouter(queryPool = pool) {
 const router = express.Router();
 
 // --- Submit new activity ---
@@ -17,7 +18,7 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
     const userId = req.user.id; // ✅ from token
 
     // Get user's weight for calorie calculation
-    const userResult = await pool.query(
+    const userResult = await queryPool.query(
       'SELECT weight FROM users WHERE id = $1',
       [userId]
     );
@@ -26,7 +27,7 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
     // Calculate calories burned
     const caloriesBurned = calculateCalories(type, distance_km, duration_min, userWeight);
 
-    const result = await pool.query(
+    const result = await queryPool.query(
       `INSERT INTO activities (user_id, type, distance_km, duration_min, date, calories_burned)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
@@ -52,14 +53,17 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
   }
 });
 
-// --- Get activities by user ---
-router.get("/:userId", authenticateToken, async (req, res) => {
-  try {
-    const { userId } = req.params;
+// --- Get the authenticated user's activities ---
+router.get("/", authenticateToken, async (req, res) => {
+  const requestedUserId = req.query.user_id;
+  if (requestedUserId && String(requestedUserId) !== String(req.user.id)) {
+    return res.status(403).json({ error: "You can only view your own activities" });
+  }
 
-    const result = await pool.query(
+  try {
+    const result = await queryPool.query(
       "SELECT * FROM activities WHERE user_id = $1 ORDER BY date DESC",
-      [userId]
+      [req.user.id]
     );
 
     res.json(result.rows);
@@ -69,4 +73,26 @@ router.get("/:userId", authenticateToken, async (req, res) => {
   }
 });
 
-export default router;
+router.get("/:userId", authenticateToken, async (req, res) => {
+  const { userId } = req.params;
+  if (String(userId) !== String(req.user.id)) {
+    return res.status(403).json({ error: "You can only view your own activities" });
+  }
+
+  try {
+    const result = await queryPool.query(
+      "SELECT * FROM activities WHERE user_id = $1 ORDER BY date DESC",
+      [req.user.id]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fetch activities failed:", err);
+    res.status(500).json({ message: "Error fetching activities" });
+  }
+});
+
+return router;
+}
+
+export default createActivityRouter();

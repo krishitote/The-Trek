@@ -47,6 +47,12 @@ node test-db.mjs
 - Backfills existing users with current timestamp
 - **Status: Must run in production**
 
+### 014_add_leaderboard_privacy.sql
+- Adds `show_on_leaderboard`, defaulting to opt-out for all existing and new users
+- Normalizes invalid historical weight/height values before validating positive-value constraints
+- Adds indexes for per-user activity history and activity-type leaderboards
+- Apply the matching `_NEON.sql` file in the production Neon SQL Editor
+
 ## ⚠️ Action Required
 
 Run these migrations in Neon SQL Editor:
