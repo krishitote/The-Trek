@@ -5,7 +5,9 @@ export const validateActivity = (req, res, next) => {
     type: Joi.string().max(50).required(),
     distance_km: Joi.number().positive().max(1000).required(),
     duration_min: Joi.number().integer().positive().max(1440).required(),
-    date: Joi.date().iso().max('now').optional()
+    date: Joi.date().iso().max('now').optional(),
+    location: Joi.string().max(200).allow('', null).optional(),
+    elevation_gain: Joi.number().integer().min(0).max(100000).allow(null).optional(),
   });
 
   const { error } = schema.validate(req.body);

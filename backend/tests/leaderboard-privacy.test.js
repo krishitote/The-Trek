@@ -10,6 +10,7 @@ const jwtSecret = "leaderboard-privacy-test-secret";
 globalThis.process.env.JWT_SECRET = jwtSecret;
 const queries = [];
 const invalidatedCaches = [];
+let insertedActivityParams = null;
 const testPool = {
   async query(sql, params = []) {
     queries.push(sql);
@@ -29,6 +30,15 @@ const testPool = {
         }],
       };
     }
+    if (normalizedSql.startsWith("SELECT WEIGHT FROM USERS")) {
+      return { rows: [{ weight: 70 }] };
+    }
+    if (normalizedSql.startsWith("INSERT INTO ACTIVITIES")) {
+      insertedActivityParams = params;
+      return {
+        rows: [{ id: 12, user_id: params[0], location: params[6], elevation_gain: params[7] }],
+      };
+    }
     if (sql.includes("FROM activities WHERE user_id")) {
       return { rows: [{ id: 1, user_id: params[0], type: "Running" }] };
     }
@@ -40,7 +50,7 @@ const noCache = () => (req, res, next) => next();
 const app = express();
 app.use(express.json());
 app.use("/api/leaderboards", createLeaderboardRouter(testPool, noCache));
-app.use("/api/activities", createActivityRouter(testPool));
+app.use("/api/activities", createActivityRouter(testPool, async () => [], async () => {}));
 app.use("/api/users", createUserRouter(testPool, async (pattern) => invalidatedCaches.push(pattern)));
 
 function authHeaders(userId = 7) {
@@ -133,4 +143,27 @@ test("activity collection reads only return the authenticated user's records", a
 
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), [{ id: 1, user_id: 7, type: "Running" }]);
+});
+
+test("activity submissions accept and persist location and elevation", async () => {
+  insertedActivityParams = null;
+  const response = await fetch(`${baseUrl}/api/activities`, {
+    method: "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "Running",
+      distance_km: 4.5,
+      duration_min: 30,
+      date: new Date().toISOString(),
+      location: "Ngong Hills",
+      elevation_gain: 125,
+    }),
+  });
+  const activity = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(activity.location, "Ngong Hills");
+  assert.equal(activity.elevation_gain, 125);
+  assert.equal(insertedActivityParams[6], "Ngong Hills");
+  assert.equal(insertedActivityParams[7], 125);
 });

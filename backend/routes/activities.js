@@ -8,13 +8,13 @@ import { invalidateCache } from '../middleware/cache.js';
 import { checkAndAwardBadges } from './badges.js';
 import { calculateCalories } from '../utils/calorieCalculator.js';
 
-export function createActivityRouter(queryPool = pool) {
+export function createActivityRouter(queryPool = pool, awardBadges = checkAndAwardBadges, clearLeaderboardCache = invalidateCache) {
 const router = express.Router();
 
 // --- Submit new activity ---
 router.post("/", activityLimiter, authenticateToken, validateActivity, async (req, res) => {
   try {
-    const { type, distance_km, duration_min, date } = req.body;
+    const { type, distance_km, duration_min, date, location, elevation_gain = 0 } = req.body;
     const userId = req.user.id; // ✅ from token
 
     // Get user's weight for calorie calculation
@@ -28,23 +28,24 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
     const caloriesBurned = calculateCalories(type, distance_km, duration_min, userWeight);
 
     const result = await queryPool.query(
-      `INSERT INTO activities (user_id, type, distance_km, duration_min, date, calories_burned)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO activities
+         (user_id, type, distance_km, duration_min, date, calories_burned, location, elevation_gain)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [userId, type, distance_km, duration_min, date || new Date(), caloriesBurned]
+      [userId, type, distance_km, duration_min, date || new Date(), caloriesBurned, location || null, elevation_gain]
     );
 
     const activity = result.rows[0];
 
     // Check and award badges asynchronously
-    checkAndAwardBadges(userId, activity.id).then(newBadges => {
+    awardBadges(userId, activity.id).then(newBadges => {
       if (newBadges.length > 0) {
         console.log(`🏆 User ${userId} earned badges:`, newBadges.join(', '));
       }
     }).catch(err => console.error('Badge check error:', err));
 
     // Invalidate leaderboard cache when new activity added
-    await invalidateCache('cache:GET:/api/leaderboards*');
+    await clearLeaderboardCache('cache:GET:/api/leaderboards*');
     
     res.json({ ...activity, newBadges: [] }); // Will send badges via separate endpoint
   } catch (err) {
