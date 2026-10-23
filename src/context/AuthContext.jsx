@@ -1,48 +1,96 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from "react";
+import { Center, Spinner } from "@chakra-ui/react";
 import { apiLogin, apiRegister, apiRefreshToken, apiLogout } from "../services/api";
 
 export const AuthContext = createContext();
+
+function tokenExpiresSoon(token, marginMs = 60 * 1000) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return !payload.exp || payload.exp * 1000 - Date.now() < marginMs;
+  } catch {
+    return true;
+  }
+}
+
+function clearStoredSession() {
+  localStorage.removeItem("user");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("token");
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage
+  // Restore the saved session, refreshing its access token first if it has expired
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    const savedAccessToken = localStorage.getItem("accessToken");
-    const savedRefreshToken = localStorage.getItem("refreshToken");
-    
-    if (savedUser && savedAccessToken && savedRefreshToken) {
-      setUser(JSON.parse(savedUser));
-      setSession({ 
-        accessToken: savedAccessToken,
-        refreshToken: savedRefreshToken 
-      });
+    let cancelled = false;
+
+    async function restoreSession() {
+      const savedUser = localStorage.getItem("user");
+      const savedAccessToken = localStorage.getItem("accessToken");
+      const savedRefreshToken = localStorage.getItem("refreshToken");
+
+      if (savedUser && savedAccessToken && savedRefreshToken) {
+        try {
+          let accessToken = savedAccessToken;
+          if (tokenExpiresSoon(accessToken)) {
+            ({ accessToken } = await apiRefreshToken(savedRefreshToken));
+            localStorage.setItem("accessToken", accessToken);
+          }
+          if (!cancelled) {
+            setUser(JSON.parse(savedUser));
+            setSession({ accessToken, refreshToken: savedRefreshToken });
+          }
+        } catch (err) {
+          console.error("Could not restore session:", err);
+          clearStoredSession();
+        }
+      }
+      if (!cancelled) setLoading(false);
     }
-    setLoading(false);
+
+    restoreSession();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Auto-refresh access token before expiry
   useEffect(() => {
     if (!session?.accessToken || !session?.refreshToken) return;
     
-    // Refresh token 1 minute before expiry (14 min for 15 min token)
-    const refreshInterval = setInterval(async () => {
+    const refresh = async () => {
       try {
         const { accessToken } = await apiRefreshToken(session.refreshToken);
-        setSession(prev => ({ ...prev, accessToken }));
+        setSession(prev => prev && { ...prev, accessToken });
         localStorage.setItem("accessToken", accessToken);
       } catch (err) {
         console.error('Token refresh failed:', err);
         // If refresh fails, log out user
         logout();
       }
-    }, 14 * 60 * 1000); // 14 minutes
-    
-    return () => clearInterval(refreshInterval);
+    };
+
+    // Refresh token 1 minute before expiry (14 min for 15 min token)
+    const refreshInterval = setInterval(refresh, 14 * 60 * 1000);
+
+    // Browsers throttle timers in background tabs, so re-check when the tab wakes up
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && tokenExpiresSoon(localStorage.getItem("accessToken") || "")) {
+        refresh();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [session?.refreshToken]);
 
   const login = async ({ username, password }) => {
@@ -93,17 +141,19 @@ export function AuthProvider({ children }) {
       // Clear local state regardless of API success
       setUser(null);
       setSession(null);
-      localStorage.removeItem("user");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      // Keep old token key for backward compatibility during migration
-      localStorage.removeItem("token");
+      clearStoredSession();
     }
   };
 
   return (
     <AuthContext.Provider value={{ user, setUser, session, login, register, logout, loading }}>
-      {children}
+      {loading ? (
+        <Center minH="100vh">
+          <Spinner size="xl" color="green.500" />
+        </Center>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
