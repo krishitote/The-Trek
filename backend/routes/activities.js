@@ -50,7 +50,7 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
     res.json({ ...activity, newBadges: [] }); // Will send badges via separate endpoint
   } catch (err) {
     console.error("Activity creation failed:", err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to submit activity" });
   }
 });
 

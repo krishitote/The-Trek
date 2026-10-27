@@ -51,6 +51,11 @@ const app = express();
 app.use(express.json());
 app.use("/api/leaderboards", createLeaderboardRouter(testPool, noCache));
 app.use("/api/activities", createActivityRouter(testPool, async () => [], async () => {}));
+app.use("/api/failing-activities", createActivityRouter({
+  async query() {
+    throw new Error("column \"location\" of relation \"activities\" does not exist");
+  },
+}, async () => [], async () => {}));
 app.use("/api/users", createUserRouter(testPool, async (pattern) => invalidatedCaches.push(pattern)));
 
 function authHeaders(userId = 7) {
@@ -166,4 +171,15 @@ test("activity submissions accept and persist location and elevation", async () 
   assert.equal(activity.elevation_gain, 125);
   assert.equal(insertedActivityParams[6], "Ngong Hills");
   assert.equal(insertedActivityParams[7], 125);
+});
+
+test("activity submission failures do not expose database error text", async () => {
+  const response = await fetch(`${baseUrl}/api/failing-activities`, {
+    method: "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "Running", distance_km: 4.5, duration_min: 30 }),
+  });
+
+  assert.equal(response.status, 500);
+  assert.deepEqual(await response.json(), { error: "Failed to submit activity" });
 });

@@ -27,16 +27,49 @@ const POPULAR_LOCATIONS = [
   "Other"
 ];
 
+// datetime-local needs local wall-clock time; toISOString() alone would be UTC.
+function localDateTimeValue() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+}
+
+function parseNumber(value) {
+  return value === "" ? NaN : Number(value);
+}
+
+// Limits mirror validateActivity on the server.
+function getNumberError(distanceKm, durationMin, elevation) {
+  if (!Number.isFinite(distanceKm) || distanceKm <= 0 || distanceKm > 1000) {
+    return "Enter a distance between 0.01 and 1000 km.";
+  }
+  if (!Number.isInteger(durationMin) || durationMin <= 0 || durationMin > 1440) {
+    return "Enter whole minutes between 1 and 1440.";
+  }
+  if (!Number.isInteger(elevation) || elevation < 0 || elevation > 100000) {
+    return "Elevation gain must be whole meters, 0 or more.";
+  }
+  return null;
+}
+
+function serverErrorDetail(err) {
+  try {
+    return JSON.parse(err.message).details;
+  } catch {
+    return undefined;
+  }
+}
+
 export default function ActivityForm({ onActivityAdded }) {
   const { user, session } = useAuth();
   const [type, setType] = useState(ACTIVITY_TYPES[0]);
   const [customType, setCustomType] = useState("");
-  const [distance, setDistance] = useState(5);
-  const [duration, setDuration] = useState(30);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 16));
+  const [distance, setDistance] = useState("");
+  const [duration, setDuration] = useState("");
+  const [date, setDate] = useState(localDateTimeValue());
   const [location, setLocation] = useState("");
   const [customLocation, setCustomLocation] = useState("");
-  const [elevationGain, setElevationGain] = useState(0);
+  const [elevationGain, setElevationGain] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
@@ -52,9 +85,25 @@ export default function ActivityForm({ onActivityAdded }) {
       return;
     }
 
-    if (distance <= 0 || duration <= 0) {
+    const activityDate = new Date(date);
+    if (Number.isNaN(activityDate.getTime()) || activityDate.getTime() > Date.now() + 60 * 1000) {
       toast({
-        title: "Distance and duration must be greater than zero.",
+        title: "Choose a date and time that is not in the future.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const distanceKm = parseNumber(distance);
+    const durationMin = parseNumber(duration);
+    const elevation = elevationGain === "" ? 0 : parseNumber(elevationGain);
+    const numberError = getNumberError(distanceKm, durationMin, elevation);
+
+    if (numberError) {
+      toast({
+        title: numberError,
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -80,11 +129,11 @@ export default function ActivityForm({ onActivityAdded }) {
       
       await apiSubmitActivity(session.accessToken, {
         type: finalType,
-        distance_km: distance,
-        duration_min: duration,
-        date,
+        distance_km: distanceKm,
+        duration_min: durationMin,
+        date: activityDate.toISOString(),
         location: finalLocation || null,
-        elevation_gain: elevationGain || 0,
+        elevation_gain: elevation,
       });
 
       toast({
@@ -97,18 +146,19 @@ export default function ActivityForm({ onActivityAdded }) {
       // Reset form
       setType(ACTIVITY_TYPES[0]);
       setCustomType("");
-      setDistance(5);
-      setDuration(30);
+      setDistance("");
+      setDuration("");
       setLocation("");
       setCustomLocation("");
-      setElevationGain(0);
-      setDate(new Date().toISOString().slice(0, 16));
+      setElevationGain("");
+      setDate(localDateTimeValue());
 
       onActivityAdded?.();
     } catch (err) {
       console.error("Activity submission failed:", err);
       toast({
         title: "Failed to submit activity.",
+        description: serverErrorDetail(err),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -146,9 +196,13 @@ export default function ActivityForm({ onActivityAdded }) {
             <FormLabel>Distance (km)</FormLabel>
             <Input
               type="number"
+              inputMode="decimal"
               step="0.01"
+              min="0.01"
+              max="1000"
+              placeholder="e.g. 5.2"
               value={distance}
-              onChange={(e) => setDistance(Number(e.target.value))}
+              onChange={(e) => setDistance(e.target.value)}
             />
           </FormControl>
 
@@ -156,8 +210,13 @@ export default function ActivityForm({ onActivityAdded }) {
             <FormLabel>Duration (minutes)</FormLabel>
             <Input
               type="number"
+              inputMode="numeric"
+              step="1"
+              min="1"
+              max="1440"
+              placeholder="e.g. 30"
               value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
+              onChange={(e) => setDuration(e.target.value)}
             />
           </FormControl>
 
@@ -189,9 +248,12 @@ export default function ActivityForm({ onActivityAdded }) {
               <FormLabel>Elevation Gain (meters) - Optional</FormLabel>
               <Input
                 type="number"
+                inputMode="numeric"
                 value={elevationGain}
-                onChange={(e) => setElevationGain(Number(e.target.value))}
+                onChange={(e) => setElevationGain(e.target.value)}
                 min="0"
+                max="100000"
+                step="1"
                 placeholder="0"
               />
             </FormControl>
@@ -202,6 +264,7 @@ export default function ActivityForm({ onActivityAdded }) {
             <Input
               type="datetime-local"
               value={date}
+              max={localDateTimeValue()}
               onChange={(e) => setDate(e.target.value)}
             />
           </FormControl>
