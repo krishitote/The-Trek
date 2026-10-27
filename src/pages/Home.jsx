@@ -24,6 +24,9 @@ import {
   AccordionPanel,
   AccordionIcon,
   Select,
+  Tabs,
+  TabList,
+  Tab,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { apiLeaderboards, apiGetCurrentChampionship } from "../services/api";
@@ -33,10 +36,17 @@ import { useAuth } from "../context/AuthContext";
  * Home page: Leaderboards with hero section, podium, and activity/gender cards
  */
 
+const PERIODS = [
+  { key: "week", label: "Last 7 days" },
+  { key: "month", label: "Last 30 days" },
+  { key: "all", label: "All time" },
+];
+
 export default function Home() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [boardLoading, setBoardLoading] = useState(false);
+  const [period, setPeriod] = useState("week");
   const [leaderboardFailed, setLeaderboardFailed] = useState(false);
   const [championship, setChampionship] = useState(null);
 
@@ -50,49 +60,50 @@ export default function Home() {
   const [selectedActivity, setSelectedActivity] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
 
-  // Fetch and cache everything once on mount
+  // Championship info loads once; leaderboards reload when the time window changes
+  useEffect(() => {
+    apiGetCurrentChampionship().then(setChampionship).catch(() => null);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      setLoading(true);
-      setError("");
-      try {
-        const [leaderboardData, champData] = await Promise.all([
-          apiLeaderboards().catch(err => {
-            console.error("Leaderboard API failed:", err);
-            setLeaderboardFailed(true);
-            return { allTimeLeaders: [], perActivity: [], perGender: [] };
-          }),
-          apiGetCurrentChampionship().catch(() => null),
-        ]);
+    setBoardLoading(true);
+    setLeaderboardFailed(false);
+
+    apiLeaderboards(period)
+      .then((data) => {
         if (cancelled) return;
+        const types = [...new Set(data.perActivity.map((r) => r.type).filter(Boolean))];
+        const genders = [...new Set(data.perGender.map((r) => r.gender).filter((g) => g === "male" || g === "female"))];
 
-        setAllTime(leaderboardData?.allTimeLeaders || []);
-        setPerActivityData(leaderboardData?.perActivity || []);
-        setPerGenderData(leaderboardData?.perGender || []);
-        setChampionship(champData);
-
-        const uniqueGenders = [...new Set((leaderboardData?.perGender || []).map((r) => r.gender).filter((g) => g === "male" || g === "female"))];
-        setActivityTypes([...new Set((leaderboardData?.perActivity || []).map((r) => r.type).filter(Boolean))]);
-        setGenderTypes(uniqueGenders);
-      } catch (err) {
-        console.error("Failed to load leaderboards", err);
-        setError("Failed to load leaderboard data. Please try again later.");
-        // Set empty arrays to prevent undefined errors
+        setAllTime(data.allTimeLeaders);
+        setPerActivityData(data.perActivity);
+        setPerGenderData(data.perGender);
+        setActivityTypes(types);
+        setGenderTypes(genders);
+        setSelectedActivity((prev) => (types.includes(prev) ? prev : types[0] || ""));
+        setSelectedGender((prev) => (genders.includes(prev) ? prev : genders[0] || ""));
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("Leaderboard API failed:", err);
+        setLeaderboardFailed(true);
         setAllTime([]);
         setPerActivityData([]);
         setPerGenderData([]);
         setActivityTypes([]);
         setGenderTypes([]);
-      } finally {
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setBoardLoading(false);
         setLoading(false);
-      }
-    }
-    load();
+      });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [period]);
 
   // UI
   if (loading) {
@@ -100,14 +111,6 @@ export default function Home() {
       <Box textAlign="center" mt={8}>
         <Spinner size="xl" color="brand.500" thickness="4px" />
         <Text mt={4} color="gray.600">Loading leaderboards...</Text>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box textAlign="center" mt={8} p={8}>
-        <Text color="red.500" fontSize="xl">{error}</Text>
       </Box>
     );
   }
@@ -305,6 +308,30 @@ export default function Home() {
             <Heading size="lg" textAlign="center" color="green.700">
               🏆 Top Champions
             </Heading>
+
+            <Tabs
+              index={PERIODS.findIndex((p) => p.key === period)}
+              onChange={(i) => setPeriod(PERIODS[i].key)}
+              variant="soft-rounded"
+              colorScheme="green"
+              isFitted
+            >
+              <TabList>
+                {PERIODS.map((p) => (
+                  <Tab key={p.key}>{p.label}</Tab>
+                ))}
+              </TabList>
+            </Tabs>
+            <Text fontSize="xs" color="gray.500" textAlign="center">
+              Overall and gender rankings use points (distance weighted by activity type, with a small
+              bonus for climbing). Activity rankings use distance.
+            </Text>
+
+            {boardLoading && (
+              <Box textAlign="center">
+                <Spinner size="md" color="brand.500" />
+              </Box>
+            )}
             
             {/* Top 3 - Compact Cards */}
             {leaderboardFailed ? (
@@ -314,13 +341,18 @@ export default function Home() {
                   We couldn't load the leaderboard just now. Please refresh in a moment.
                 </AlertDescription>
               </Alert>
-            ) : allTime.length === 0 ? (
+            ) : allTime.length === 0 && !boardLoading ? (
               <Card borderWidth="1px" borderColor="gray.200">
                 <CardBody textAlign="center">
-                  <Text fontSize="lg" fontWeight="medium">No champions yet</Text>
+                  <Text fontSize="lg" fontWeight="medium">No champions in this period yet</Text>
                   <Text color="gray.600" mt={1}>
-                    Athletes appear here when they log activities and opt in under Profile.
+                    Log an activity to claim the top spot.
                   </Text>
+                  {!user && (
+                    <Button as={Link} to="/register" colorScheme="green" size="sm" mt={3}>
+                      Join The Trek
+                    </Button>
+                  )}
                 </CardBody>
               </Card>
             ) : null}
@@ -340,7 +372,7 @@ export default function Home() {
                         <VStack align="start" spacing={0}>
                           <Text fontWeight="bold" fontSize="lg">{leader.username}</Text>
                           <Text fontSize="sm" color="gray.600">
-                            {leader.activity_count} activities
+                            {Number(leader.total_distance || 0).toFixed(1)} km · {leader.activity_count} activities
                           </Text>
                         </VStack>
                       </HStack>
@@ -351,7 +383,7 @@ export default function Home() {
                         py={1}
                         borderRadius="full"
                       >
-                        {Number(leader.total_distance || 0).toFixed(1)} km
+                        {Number(leader.points || 0).toFixed(0)} pts
                       </Badge>
                     </HStack>
                   </CardBody>
@@ -379,7 +411,7 @@ export default function Home() {
                           <Text fontWeight="medium">{leader.username}</Text>
                         </HStack>
                         <Text color="gray.600" fontWeight="medium">
-                          {Number(leader.total_distance || 0).toFixed(1)} km
+                          {Number(leader.points || 0).toFixed(0)} pts · {Number(leader.total_distance || 0).toFixed(1)} km
                         </Text>
                       </HStack>
                     ))}
@@ -392,7 +424,7 @@ export default function Home() {
           <Divider my={4} />
 
           {/* Leaders by Activity - Collapsible with Dropdown */}
-          <Accordion allowToggle>
+          <Accordion allowToggle defaultIndex={[0]}>
             <AccordionItem border="1px" borderColor="green.200" borderRadius="md">
               <AccordionButton _hover={{ bg: "green.50" }} p={4}>
                 <Box flex="1" textAlign="left">
@@ -480,7 +512,7 @@ export default function Home() {
           <Divider my={4} />
 
           {/* Leaders by Gender - Collapsible with Dropdown */}
-          <Accordion allowToggle>
+          <Accordion allowToggle defaultIndex={[0]}>
             <AccordionItem border="1px" borderColor="blue.200" borderRadius="md">
               <AccordionButton _hover={{ bg: "blue.50" }} p={4}>
                 <Box flex="1" textAlign="left">
@@ -549,10 +581,10 @@ export default function Home() {
                                     fontWeight="bold"
                                     color={selectedGender === "male" ? "blue.600" : "pink.600"}
                                   >
-                                    {Number(user.total_distance || 0).toFixed(1)} km
+                                    {Number(user.points || 0).toFixed(0)} pts
                                   </Text>
                                   <Text fontSize="xs" color="gray.500">
-                                    {user.activity_count} activities
+                                    {Number(user.total_distance || 0).toFixed(1)} km · {user.activity_count} activities
                                   </Text>
                                 </VStack>
                               </HStack>

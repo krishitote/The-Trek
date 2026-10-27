@@ -129,14 +129,16 @@ export default function Dashboard() {
           boxShadow="lg"
         >
           <HStack justify="space-between" mb={2}>
-            <Text fontSize="sm" opacity={0.9}>Global Rank</Text>
+            <Text fontSize="sm" opacity={0.9}>Rank (last 7 days)</Text>
             <Text fontSize="3xl">🏆</Text>
           </HStack>
           <Heading size="2xl" fontWeight="black">#{userRank?.rank || "-"}</Heading>
           <Text fontSize="sm" opacity={0.8}>
             {userRank?.rank
-              ? `out of ${userRank.totalUsers} trekkers`
-              : "Opt in on your Profile to join the leaderboard"}
+              ? `out of ${userRank.totalUsers} active trekkers`
+              : userRank?.showOnLeaderboard === false
+                ? "Join the leaderboard in your Profile"
+                : "Log an activity to get ranked"}
           </Text>
         </Box>
 

@@ -24,6 +24,7 @@ import Badges from "./pages/Badges";
 import Feed from "./pages/Feed";
 import AdminDashboard from "./pages/AdminDashboard";
 import InstallPWA from "./components/InstallPWA";
+import LeaderboardChoiceModal from "./components/LeaderboardChoiceModal";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
       transition="background-color 0.3s ease"
       p={6}
     >
+      <LeaderboardChoiceModal />
       {/* HEADER */}
       <Flex
         as="header"

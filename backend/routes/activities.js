@@ -17,6 +17,22 @@ router.post("/", activityLimiter, authenticateToken, validateActivity, async (re
     const { type, distance_km, duration_min, date, location, elevation_gain = 0 } = req.body;
     const userId = req.user.id; // ✅ from token
 
+    // A day only has 1,440 minutes; this stops repeated maximum-size entries inflating the leaderboard.
+    const dayStart = new Date(date || Date.now());
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    const dayTotal = await queryPool.query(
+      `SELECT COALESCE(SUM(duration_min), 0) AS minutes
+       FROM activities WHERE user_id = $1 AND date >= $2 AND date < $3`,
+      [userId, dayStart, dayEnd]
+    );
+    if (Number(dayTotal.rows[0]?.minutes || 0) + Number(duration_min) > 1440) {
+      return res.status(400).json({
+        error: 'Invalid input',
+        details: 'That would be more than 24 hours of activity logged for one day.',
+      });
+    }
+
     // Get user's weight for calorie calculation
     const userResult = await queryPool.query(
       'SELECT weight FROM users WHERE id = $1',

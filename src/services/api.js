@@ -45,11 +45,11 @@ export async function apiLogin({ username, password }) {
   return handleResponse(res);
 }
 
-export async function apiRegister({ username, email, password }) {
+export async function apiRegister({ username, email, password, show_on_leaderboard }) {
   const res = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({ username, email, password, show_on_leaderboard }),
   });
   return handleResponse(res);
 }
@@ -73,8 +73,8 @@ export async function apiLogout(refreshToken) {
 }
 
 // ---------- Leaderboards ----------
-export async function apiLeaderboards() {
-  const res = await fetch(`${API_URL}/api/leaderboards`);
+export async function apiLeaderboards(period = "week") {
+  const res = await fetch(`${API_URL}/api/leaderboards?period=${encodeURIComponent(period)}`);
   const data = await handleResponse(res);
   return {
     allTimeLeaders: data.allTimeLeaders || [],
@@ -90,6 +90,15 @@ export async function apiQuickLeaderboard() {
 
 export async function apiMyLeaderboardStats(token) {
   const res = await fetch(`${API_URL}/api/leaderboards/me`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
+
+export async function apiSetLeaderboardChoice(token, userId, showOnLeaderboard) {
+  const res = await fetch(`${API_URL}/api/users/${userId}/leaderboard-visibility`, {
+    method: "PUT",
+    headers: authHeaders(token),
+    body: JSON.stringify({ show_on_leaderboard: showOnLeaderboard }),
+  });
   return handleResponse(res);
 }
 // ---------- Communities ----------

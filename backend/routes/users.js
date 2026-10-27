@@ -2,7 +2,7 @@
 import express from "express";
 import pool from "../db.js";
 import { authenticateToken } from "../middleware/authMiddleware.js";
-import { validateProfileUpdate } from "../middleware/validation.js";
+import { validateProfileUpdate, validateLeaderboardChoice } from "../middleware/validation.js";
 import { invalidateCache } from "../middleware/cache.js";
 
 // --- Update user profile (height, weight, gender, date_of_birth, etc.) ---
@@ -32,7 +32,7 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'users' 
-      AND column_name IN ('height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name', 'age', 'profile_image', 'is_admin', 'show_on_leaderboard')
+      AND column_name IN ('height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name', 'age', 'profile_image', 'is_admin', 'show_on_leaderboard', 'leaderboard_choice_made_at')
     `);
     
     const existingColumns = columnsCheck.rows.map(r => r.column_name);
@@ -87,6 +87,9 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
     if (existingColumns.includes('show_on_leaderboard') && show_on_leaderboard !== undefined) {
       updates.push(`show_on_leaderboard = $${paramCount++}`);
       values.push(show_on_leaderboard);
+      if (existingColumns.includes('leaderboard_choice_made_at')) {
+        updates.push(`leaderboard_choice_made_at = NOW()`);
+      }
     }
 
     if (updates.length === 0) {
@@ -98,7 +101,7 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
     // Build RETURNING clause with only existing columns
     const returningColumns = ['id', 'username', 'email'];
     const updateableColumns = ['height', 'weight', 'gender', 'date_of_birth', 'first_name', 'last_name', 'age', 'show_on_leaderboard'];
-    const additionalColumns = ['profile_image', 'is_admin'];
+    const additionalColumns = ['profile_image', 'is_admin', 'leaderboard_choice_made_at'];
     
     // Add updateable columns that exist
     updateableColumns.forEach(col => {
@@ -131,10 +134,44 @@ router.put("/:id", authenticateToken, validateProfileUpdate, async (req, res) =>
       await clearLeaderboardCache('cache:GET:/api/leaderboards*');
     }
 
-    res.json(result.rows[0]);
+    const { leaderboard_choice_made_at: choiceMadeAt, ...profile } = result.rows[0];
+    res.json({
+      ...profile,
+      ...(existingColumns.includes('leaderboard_choice_made_at')
+        ? { leaderboard_choice_made: Boolean(choiceMadeAt) }
+        : {}),
+    });
   } catch (err) {
     console.error("Profile update failed:", err);
     res.status(500).json({ error: "Error updating profile" });
+  }
+});
+
+// One-time prompt answer; separate from the profile route, which requires gender and date of birth.
+router.put("/:id/leaderboard-visibility", authenticateToken, validateLeaderboardChoice, async (req, res) => {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || req.user.id !== userId) {
+    return res.status(403).json({ error: "You can only change your own leaderboard visibility" });
+  }
+
+  try {
+    const result = await queryPool.query(
+      `UPDATE users
+       SET show_on_leaderboard = $1, leaderboard_choice_made_at = NOW()
+       WHERE id = $2
+       RETURNING show_on_leaderboard, TRUE AS leaderboard_choice_made`,
+      [req.body.show_on_leaderboard, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await clearLeaderboardCache('cache:GET:/api/leaderboards*');
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Leaderboard visibility update failed:", err);
+    res.status(500).json({ error: "Error saving your choice" });
   }
 });
 

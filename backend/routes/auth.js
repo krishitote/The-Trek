@@ -2,7 +2,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import pool from "../db.js";
+import defaultPool from "../db.js";
 import { 
   generateAccessToken, 
   generateRefreshToken, 
@@ -16,20 +16,26 @@ import {
 import { authLimiter } from '../middleware/rateLimiter.js';
 
 dotenv.config();
+
+export function createAuthRouter(pool = defaultPool) {
 const router = express.Router();
 
 // Register
 router.post("/register", authLimiter, validateRegistration, async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, show_on_leaderboard } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Public only when the client sends an explicit choice; otherwise hidden and asked later.
+    const choiceMade = typeof show_on_leaderboard === 'boolean';
+
     const result = await pool.query(
-      `INSERT INTO users (username, email, password)
-       VALUES ($1, $2, $3)
-      RETURNING id, username, email, is_admin, show_on_leaderboard`,
-      [username, email, hashedPassword]
+      `INSERT INTO users (username, email, password, show_on_leaderboard, leaderboard_choice_made_at)
+       VALUES ($1, $2, $3, $4, CASE WHEN $5::boolean THEN NOW() ELSE NULL END)
+       RETURNING id, username, email, is_admin, show_on_leaderboard,
+                 (leaderboard_choice_made_at IS NOT NULL) AS leaderboard_choice_made`,
+      [username, email, hashedPassword, choiceMade ? show_on_leaderboard : false, choiceMade]
     );
 
     const user = result.rows[0];
@@ -106,6 +112,7 @@ router.post("/login", authLimiter, validateLogin, async (req, res) => {
         height: user.height,
         profile_image: user.profile_image,
         show_on_leaderboard: user.show_on_leaderboard ?? false,
+        leaderboard_choice_made: Boolean(user.leaderboard_choice_made_at),
         is_admin: user.is_admin || false
       }
     });
@@ -223,4 +230,7 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
-export default router;
+return router;
+}
+
+export default createAuthRouter();

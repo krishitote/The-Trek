@@ -11,13 +11,14 @@ globalThis.process.env.JWT_SECRET = jwtSecret;
 const queries = [];
 const invalidatedCaches = [];
 let insertedActivityParams = null;
+let dailyMinutes = 0;
 const testPool = {
   async query(sql, params = []) {
     queries.push(sql);
     const normalizedSql = sql.trimStart().toUpperCase();
     if (normalizedSql.includes("INFORMATION_SCHEMA.COLUMNS")) {
       return {
-        rows: ["height", "weight", "gender", "date_of_birth", "first_name", "last_name", "age", "profile_image", "is_admin", "show_on_leaderboard"]
+        rows: ["height", "weight", "gender", "date_of_birth", "first_name", "last_name", "age", "profile_image", "is_admin", "show_on_leaderboard", "leaderboard_choice_made_at"]
           .map((column_name) => ({ column_name })),
       };
     }
@@ -45,6 +46,9 @@ const testPool = {
       return {
         rows: [{ id: 12, user_id: params[0], location: params[6], elevation_gain: params[7] }],
       };
+    }
+    if (normalizedSql.includes("SUM(DURATION_MIN)")) {
+      return { rows: [{ minutes: dailyMinutes }] };
     }
     if (sql.includes("FROM activities WHERE user_id")) {
       return { rows: [{ id: 1, user_id: params[0], type: "Running" }] };
@@ -101,7 +105,7 @@ test("all categorized public leaderboards only query users who opted in", async 
   const result = await response.json();
 
   assert.equal(response.status, 200);
-  assert.deepEqual(result, { allTimeLeaders: [], perActivity: [], perGender: [] });
+  assert.deepEqual(result, { period: "week", allTimeLeaders: [], perActivity: [], perGender: [] });
   assert.equal(queries.length, 3);
   assert.ok(queries.every((sql) => /u\.show_on_leaderboard\s*=\s*TRUE/.test(sql)));
 });
@@ -238,4 +242,95 @@ test("profile updates reject genders other than male or female", async () => {
   });
 
   assert.equal(response.status, 400);
+});
+
+test("leaderboards default to the last 7 days and support 30 days and all time", async () => {
+  const intervalFor = async (suffix) => {
+    queries.length = 0;
+    const response = await fetch(`${baseUrl}/api/leaderboards${suffix}`);
+    assert.equal(response.status, 200);
+    return queries.map((sql) => sql.match(/INTERVAL '(\d+) days'/)?.[1] ?? null);
+  };
+
+  assert.deepEqual(await intervalFor(""), ["7", "7", "7"]);
+  assert.deepEqual(await intervalFor("?period=week"), ["7", "7", "7"]);
+  assert.deepEqual(await intervalFor("?period=month"), ["30", "30", "30"]);
+  assert.deepEqual(await intervalFor("?period=all"), [null, null, null]);
+});
+
+test("leaderboards reject an unknown period", async () => {
+  const response = await fetch(`${baseUrl}/api/leaderboards?period=forever`);
+
+  assert.equal(response.status, 400);
+});
+
+test("overall and gender boards rank by points and every board is capped at ten", async () => {
+  queries.length = 0;
+  await fetch(`${baseUrl}/api/leaderboards`);
+
+  assert.match(queries[0], /ORDER BY points DESC, MAX\(a\.date\) ASC/);
+  assert.match(queries[0], /LIMIT 10/);
+  assert.match(queries[1], /board_position <= 10/);
+  assert.match(queries[1], /ORDER BY SUM\(a\.distance_km\) DESC/);
+  assert.match(queries[2], /board_position <= 10/);
+  assert.match(queries[2], /WHEN 'Swimming' THEN 4/);
+});
+
+test("public leaderboards do not expose gender outside the gender board", async () => {
+  queries.length = 0;
+  await fetch(`${baseUrl}/api/leaderboards`);
+
+  assert.doesNotMatch(queries[0], /u\.gender/);
+  assert.doesNotMatch(queries[1], /u\.gender/);
+});
+
+test("activity submissions reject implausible pace and oversized distances", async () => {
+  insertedActivityParams = null;
+  const submit = (body) => fetch(`${baseUrl}/api/activities`, {
+    method: "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const tooFast = await submit({ type: "Running", distance_km: 50, duration_min: 30 });
+  const tooFar = await submit({ type: "Walking", distance_km: 150, duration_min: 1000 });
+  const bodyOfTooFast = await tooFast.json();
+
+  assert.equal(tooFast.status, 400);
+  assert.match(bodyOfTooFast.details, /too fast for Running/);
+  assert.equal(tooFar.status, 400);
+  assert.equal(insertedActivityParams, null);
+});
+
+test("activity submissions cannot exceed 24 hours of activity in one day", async () => {
+  insertedActivityParams = null;
+  dailyMinutes = 1420;
+  const response = await fetch(`${baseUrl}/api/activities`, {
+    method: "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "Walking", distance_km: 3, duration_min: 30 }),
+  });
+  dailyMinutes = 0;
+
+  assert.equal(response.status, 400);
+  assert.equal(insertedActivityParams, null);
+});
+
+test("the one-time leaderboard choice is owner-only, validated, and clears cached rankings", async () => {
+  invalidatedCaches.length = 0;
+  const choose = (id, body, userId = 7) => fetch(`${baseUrl}/api/users/${id}/leaderboard-visibility`, {
+    method: "PUT",
+    headers: { ...authHeaders(userId), "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  assert.equal((await choose(8, { show_on_leaderboard: true })).status, 403);
+  assert.equal((await choose(7, { show_on_leaderboard: "yes" })).status, 400);
+  assert.equal((await choose(7, {})).status, 400);
+  assert.deepEqual(invalidatedCaches, []);
+
+  const response = await choose(7, { show_on_leaderboard: true });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).show_on_leaderboard, true);
+  assert.deepEqual(invalidatedCaches, ["cache:GET:/api/leaderboards*"]);
 });

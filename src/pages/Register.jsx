@@ -7,6 +7,7 @@ import {
   VStack,
   FormControl,
   FormLabel,
+  Checkbox,
   useToast,
   Spinner,
   Text,
@@ -19,6 +20,7 @@ export default function Register() {
     username: "",
     email: "",
     password: "",
+    show_on_leaderboard: true,
   });
 
   const [loading, setLoading] = useState(false);
@@ -146,6 +148,17 @@ export default function Register() {
               focusBorderColor="brand.500" 
             />
           </FormControl>
+
+          <Checkbox
+            isChecked={form.show_on_leaderboard}
+            onChange={(e) => setForm({ ...form, show_on_leaderboard: e.target.checked })}
+            alignItems="flex-start"
+          >
+            <Text fontSize="sm">
+              Show my username and activity totals on the public Top Champions list.
+              You can change this any time in your Profile.
+            </Text>
+          </Checkbox>
 
           <Button
             type="submit"
