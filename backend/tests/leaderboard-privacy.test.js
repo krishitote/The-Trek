@@ -220,3 +220,22 @@ test("an opted-out user still sees their own distance but has no rank", async ()
     totalUsers: 3,
   });
 });
+
+test("leaderboards count hiking and only group male and female athletes", async () => {
+  queries.length = 0;
+  await fetch(`${baseUrl}/api/leaderboards`);
+
+  assert.equal(queries.length, 3);
+  assert.ok(queries.every((sql) => sql.includes("'Hiking'")));
+  assert.match(queries[2], /LOWER\(u\.gender\) IN \('male','female'\)/);
+});
+
+test("profile updates reject genders other than male or female", async () => {
+  const response = await fetch(`${baseUrl}/api/users/7`, {
+    method: "PUT",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ gender: "other", date_of_birth: "2000-01-01" }),
+  });
+
+  assert.equal(response.status, 400);
+});

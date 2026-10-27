@@ -36,7 +36,7 @@ export function createLeaderboardRouter(queryPool = pool, cacheFactory = cacheMi
                  AVG(a.duration_min / NULLIF(a.distance_km, 0)) AS avg_pace
           FROM activities a
           JOIN users u ON a.user_id = u.id
-          WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps')
+          WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps','Hiking')
             AND u.show_on_leaderboard = TRUE
           GROUP BY u.id, u.username, u.gender
           ORDER BY total_distance DESC
@@ -49,7 +49,7 @@ export function createLeaderboardRouter(queryPool = pool, cacheFactory = cacheMi
                  AVG(a.duration_min / NULLIF(a.distance_km, 0)) AS avg_pace
           FROM activities a
           JOIN users u ON a.user_id = u.id
-          WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps')
+          WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps','Hiking')
             AND u.show_on_leaderboard = TRUE
           GROUP BY a.type, u.id, u.username, u.gender
           ORDER BY a.type, total_distance DESC
@@ -61,8 +61,8 @@ export function createLeaderboardRouter(queryPool = pool, cacheFactory = cacheMi
                  AVG(a.duration_min / NULLIF(a.distance_km, 0)) AS avg_pace
           FROM activities a
           JOIN users u ON a.user_id = u.id
-          WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps')
-            AND u.gender IS NOT NULL
+          WHERE a.type IN ('Running','Walking','Cycling','Swimming','Steps','Hiking')
+            AND LOWER(u.gender) IN ('male','female')
             AND u.show_on_leaderboard = TRUE
           GROUP BY u.gender, u.id, u.username
           ORDER BY u.gender, total_distance DESC

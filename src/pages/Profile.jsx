@@ -394,7 +394,6 @@ export default function Profile() {
                 >
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  <option value="other">Other</option>
                 </Select>
               ) : (
                 <Text fontSize="xl" fontWeight="bold" color="brand.500" textTransform="capitalize">

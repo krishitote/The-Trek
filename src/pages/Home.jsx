@@ -72,7 +72,7 @@ export default function Home() {
         setPerGenderData(leaderboardData?.perGender || []);
         setChampionship(champData);
 
-        const uniqueGenders = [...new Set((leaderboardData?.perGender || []).map((r) => r.gender).filter(Boolean))];
+        const uniqueGenders = [...new Set((leaderboardData?.perGender || []).map((r) => r.gender).filter((g) => g === "male" || g === "female"))];
         setActivityTypes([...new Set((leaderboardData?.perActivity || []).map((r) => r.type).filter(Boolean))]);
         setGenderTypes(uniqueGenders);
       } catch (err) {
@@ -113,10 +113,8 @@ export default function Home() {
   }
 
   // Get activity icon
-  const genderLabel = (gender) =>
-    gender === "male" ? "Male" : gender === "female" ? "Female" : "Other";
-  const genderIcon = (gender) =>
-    gender === "male" ? "🚹" : gender === "female" ? "🚺" : "🧑";
+  const genderLabel = (gender) => (gender === "male" ? "Male" : "Female");
+  const genderIcon = (gender) => (gender === "male" ? "🚹" : "🚺");
 
   const getActivityIcon = (type) => {
     const icons = {
@@ -407,7 +405,8 @@ export default function Home() {
               <AccordionPanel pb={4}>
                 <VStack spacing={4} align="stretch">
                   <Select
-                    placeholder="Select an activity"
+                    placeholder={activityTypes.length === 0 ? "No activity leaders yet" : "Select an activity"}
+                    isDisabled={activityTypes.length === 0}
                     value={selectedActivity}
                     onChange={(e) => setSelectedActivity(e.target.value)}
                     size="md"
@@ -494,7 +493,8 @@ export default function Home() {
               <AccordionPanel pb={4}>
                 <VStack spacing={4} align="stretch">
                   <Select
-                    placeholder="Select a gender"
+                    placeholder={genderTypes.length === 0 ? "No gender leaders yet" : "Select a gender"}
+                    isDisabled={genderTypes.length === 0}
                     value={selectedGender}
                     onChange={(e) => setSelectedGender(e.target.value)}
                     size="md"

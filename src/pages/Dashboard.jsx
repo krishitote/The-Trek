@@ -1,5 +1,6 @@
 // src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ActivityForm from "../components/ActivityForm";
 import ProgressChart from "../components/ProgressChart";
@@ -18,6 +19,9 @@ import {
   SimpleGrid,
   Container,
   Badge,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react";
 
 // Helper functions for activity styling
@@ -85,6 +89,18 @@ export default function Dashboard() {
       <Heading size="xl" mb={8} color="brand.500" fontWeight="black">
         🏃 My Dashboard
       </Heading>
+
+      {userRank && userRank.showOnLeaderboard === false && (
+        <Alert status="info" borderRadius="xl" mb={6}>
+          <AlertIcon />
+          <AlertDescription flex="1">
+            You're not on the public leaderboard yet, so your activities won't appear under Top Champions.
+          </AlertDescription>
+          <Button as={Link} to="/profile" size="sm" colorScheme="blue" ml={3}>
+            Turn on in Profile
+          </Button>
+        </Alert>
+      )}
 
       {/* Stats Cards Row */}
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>

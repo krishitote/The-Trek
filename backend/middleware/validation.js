@@ -61,7 +61,7 @@ export const validateProfileUpdate = (req, res, next) => {
   const schema = Joi.object({
     first_name: Joi.string().max(100).allow('').optional(),
     last_name: Joi.string().max(100).allow('').optional(),
-    gender: Joi.string().valid('male', 'female', 'other').required(),
+    gender: Joi.string().valid('male', 'female').required(),
     date_of_birth: Joi.date().max('now').required(),
     weight: Joi.number().positive().max(500).allow(null).optional(),
     height: Joi.number().positive().max(300).allow(null).optional(),
