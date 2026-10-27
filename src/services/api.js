@@ -87,6 +87,11 @@ export async function apiQuickLeaderboard() {
   const res = await fetch(`${API_URL}/api/leaderboards/quick`);
   return handleResponse(res);
 }
+
+export async function apiMyLeaderboardStats(token) {
+  const res = await fetch(`${API_URL}/api/leaderboards/me`, { headers: authHeaders(token) });
+  return handleResponse(res);
+}
 // ---------- Communities ----------
 export async function apiGetCommunities(token) {
   const res = await fetch(`${API_URL}/api/communities`, { headers: authHeaders(token) });

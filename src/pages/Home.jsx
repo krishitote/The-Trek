@@ -37,6 +37,7 @@ export default function Home() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [leaderboardFailed, setLeaderboardFailed] = useState(false);
   const [championship, setChampionship] = useState(null);
 
   const [allTime, setAllTime] = useState([]);
@@ -59,6 +60,7 @@ export default function Home() {
         const [leaderboardData, champData] = await Promise.all([
           apiLeaderboards().catch(err => {
             console.error("Leaderboard API failed:", err);
+            setLeaderboardFailed(true);
             return { allTimeLeaders: [], perActivity: [], perGender: [] };
           }),
           apiGetCurrentChampionship().catch(() => null),
@@ -71,8 +73,6 @@ export default function Home() {
         setChampionship(champData);
 
         const uniqueGenders = [...new Set((leaderboardData?.perGender || []).map((r) => r.gender).filter(Boolean))];
-        console.log("Gender data:", leaderboardData?.perGender);
-        console.log("Unique genders:", uniqueGenders);
         setActivityTypes([...new Set((leaderboardData?.perActivity || []).map((r) => r.type).filter(Boolean))]);
         setGenderTypes(uniqueGenders);
       } catch (err) {
@@ -113,6 +113,11 @@ export default function Home() {
   }
 
   // Get activity icon
+  const genderLabel = (gender) =>
+    gender === "male" ? "Male" : gender === "female" ? "Female" : "Other";
+  const genderIcon = (gender) =>
+    gender === "male" ? "🚹" : gender === "female" ? "🚺" : "🧑";
+
   const getActivityIcon = (type) => {
     const icons = {
       Running: "🏃",
@@ -304,6 +309,23 @@ export default function Home() {
             </Heading>
             
             {/* Top 3 - Compact Cards */}
+            {leaderboardFailed ? (
+              <Alert status="warning" borderRadius="md">
+                <AlertIcon />
+                <AlertDescription>
+                  We couldn't load the leaderboard just now. Please refresh in a moment.
+                </AlertDescription>
+              </Alert>
+            ) : allTime.length === 0 ? (
+              <Card borderWidth="1px" borderColor="gray.200">
+                <CardBody textAlign="center">
+                  <Text fontSize="lg" fontWeight="medium">No champions yet</Text>
+                  <Text color="gray.600" mt={1}>
+                    Athletes appear here when they log activities and opt in under Profile.
+                  </Text>
+                </CardBody>
+              </Card>
+            ) : null}
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
               {allTime.slice(0, 3).map((leader, idx) => (
                 <Card 
@@ -481,7 +503,7 @@ export default function Home() {
                   >
                     {genderTypes.map((gender) => (
                       <option key={gender} value={gender}>
-                        {gender === "male" ? "🚹 Male" : "🚺 Female"}
+                        {genderIcon(gender)} {genderLabel(gender)}
                       </option>
                     ))}
                   </Select>
@@ -490,7 +512,7 @@ export default function Home() {
                     <Card borderWidth="1px" borderColor={selectedGender === "male" ? "blue.200" : "pink.200"}>
                       <CardBody>
                         <Heading size="sm" mb={4} color={selectedGender === "male" ? "blue.700" : "pink.700"}>
-                          Top 10 - {selectedGender === "male" ? "Male" : "Female"} Athletes
+                          Top 10 - {genderLabel(selectedGender)} Athletes
                         </Heading>
                         <VStack spacing={2} align="stretch">
                           {perGenderData

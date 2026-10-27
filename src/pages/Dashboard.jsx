@@ -5,7 +5,7 @@ import ActivityForm from "../components/ActivityForm";
 import ProgressChart from "../components/ProgressChart";
 import EnhancedStats from "../components/EnhancedStats";
 import ShareButton from "../components/ShareButton";
-import { apiActivities, apiQuickLeaderboard } from "../services/api";
+import { apiActivities, apiMyLeaderboardStats } from "../services/api";
 import {
   Box,
   Heading,
@@ -38,7 +38,6 @@ const getActivityColor = (type) => {
 export default function Dashboard() {
   const { user, session } = useAuth();
   const [activities, setActivities] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showChart, setShowChart] = useState(false);
   const [userRank, setUserRank] = useState(null);
@@ -53,22 +52,12 @@ export default function Dashboard() {
     }
     setLoading(true);
     try {
-      const [userActs, leaderboard] = await Promise.all([
+      const [userActs, myStats] = await Promise.all([
         apiActivities(session.accessToken, user.id),
-        apiQuickLeaderboard(),
+        apiMyLeaderboardStats(session.accessToken),
       ]);
       setActivities(userActs);
-      setAllUsers(leaderboard);
-
-      // Find user's rank from pre-computed leaderboard
-      const rank = leaderboard.findIndex((u) => u.id === user.id) + 1;
-      const userStats = leaderboard.find((u) => u.id === user.id);
-      
-      setUserRank({
-        rank,
-        totalUsers: leaderboard.length,
-        totalDistance: userStats?.total_distance || 0,
-      });
+      setUserRank(myStats);
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
     } finally {
@@ -111,7 +100,7 @@ export default function Dashboard() {
             <Text fontSize="sm" opacity={0.9}>Total Distance</Text>
             <Text fontSize="3xl">🏃</Text>
           </HStack>
-          <Heading size="2xl" fontWeight="black">{userRank?.totalDistance || 0}</Heading>
+          <Heading size="2xl" fontWeight="black">{Number(userRank?.totalDistance || 0).toFixed(1)}</Heading>
           <Text fontSize="sm" opacity={0.8}>kilometers trekked</Text>
         </Box>
 
@@ -128,7 +117,11 @@ export default function Dashboard() {
             <Text fontSize="3xl">🏆</Text>
           </HStack>
           <Heading size="2xl" fontWeight="black">#{userRank?.rank || "-"}</Heading>
-          <Text fontSize="sm" opacity={0.8}>out of {userRank?.totalUsers || 0} trekkers</Text>
+          <Text fontSize="sm" opacity={0.8}>
+            {userRank?.rank
+              ? `out of ${userRank.totalUsers} trekkers`
+              : "Opt in on your Profile to join the leaderboard"}
+          </Text>
         </Box>
 
         {/* Activities Count Card */}

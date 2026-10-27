@@ -30,6 +30,13 @@ const testPool = {
         }],
       };
     }
+    if (normalizedSql.startsWith("WITH TOTALS")) {
+      return {
+        rows: [params[0] === 9
+          ? { total_distance: "12.50", show_on_leaderboard: false, rank: null, total_users: "3" }
+          : { total_distance: "42.5", show_on_leaderboard: true, rank: "2", total_users: "3" }],
+      };
+    }
     if (normalizedSql.startsWith("SELECT WEIGHT FROM USERS")) {
       return { rows: [{ weight: 70 }] };
     }
@@ -182,4 +189,34 @@ test("activity submission failures do not expose database error text", async () 
 
   assert.equal(response.status, 500);
   assert.deepEqual(await response.json(), { error: "Failed to submit activity" });
+});
+
+test("own leaderboard stats require authentication", async () => {
+  const response = await fetch(`${baseUrl}/api/leaderboards/me`);
+
+  assert.equal(response.status, 401);
+});
+
+test("an opted-in user gets their distance and rank", async () => {
+  const response = await fetch(`${baseUrl}/api/leaderboards/me`, { headers: authHeaders(7) });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    totalDistance: 42.5,
+    showOnLeaderboard: true,
+    rank: 2,
+    totalUsers: 3,
+  });
+});
+
+test("an opted-out user still sees their own distance but has no rank", async () => {
+  const response = await fetch(`${baseUrl}/api/leaderboards/me`, { headers: authHeaders(9) });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    totalDistance: 12.5,
+    showOnLeaderboard: false,
+    rank: null,
+    totalUsers: 3,
+  });
 });
